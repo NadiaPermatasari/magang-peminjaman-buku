@@ -107,6 +107,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Blind Index Key
+    |--------------------------------------------------------------------------
+    |
+    | Separate secret (spec §11) used only for keyed-HMAC blind indexes on
+    | encrypted-but-searchable fields (see App\Support\BlindIndex). Never
+    | reuse APP_KEY for this — generate an independent random value per
+    | environment via: php artisan tinker --execute="echo base64_encode(random_bytes(32));"
+    |
+    */
+
+    'blind_index_key' => env('BLIND_INDEX_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |

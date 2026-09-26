@@ -1,12 +1,97 @@
-@import 'tailwindcss';
+/*!
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source "../**/*.blade.php";
-@source "../**/*.js";
-@source "../**/*.vue";
+=========================================================
+* Argon Dashboard 2 Tailwind - v1.0.1 (Laravel starter)
+=========================================================
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+* Product Page: https://www.creative-tim.com/product/argon-dashboard-tailwind
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+
+* Coded by www.creative-tim.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+ * Desktop sidenav toggle (hamburger button in the navbar).
+ * body.sidenav-collapsed hides the sidenav and lets the content span
+ * the full width on xl screens. Mobile keeps Argon's slide-in behaviour.
+ * ------------------------------------------------------------------ */
+@media (min-width: 1200px) {
+  body.sidenav-collapsed > aside,
+  body.sidenav-collapsed aside[sidenav-main] {
+    transform: translateX(-120%) !important;
+  }
+  html[dir="rtl"] body.sidenav-collapsed > aside {
+    transform: translateX(120%) !important;
+  }
+  body.sidenav-collapsed .xl\:ml-68 {
+    margin-left: 0 !important;
+  }
+  body.sidenav-collapsed .xl\:mr-68 {
+    margin-right: 0 !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * Tom Select (select2-style) skinned to match Argon inputs.
+ * ------------------------------------------------------------------ */
+/* Tom Select copies the <select>'s classes onto its wrapper: neutralise the box there */
+.ts-wrapper.argon-select {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ts-wrapper.argon-select .ts-control {
+  @apply rounded-lg border border-solid border-gray-300 bg-white px-3 py-2 text-sm font-normal leading-5.6 text-gray-700 shadow-none transition-all dark:border-white/20 dark:bg-slate-850 dark:text-white;
+  min-height: 2.5rem;
+}
+.ts-wrapper.argon-select.focus .ts-control {
+  @apply border-blue-500 shadow-primary-outline;
+}
+.ts-wrapper.argon-select.multi .ts-control > .item {
+  @apply mr-1 rounded-md bg-gradient-to-tl from-blue-500 to-violet-500 px-2 py-0.5 text-xs font-bold text-white;
+}
+.ts-wrapper.argon-select.multi .ts-control > .item.active {
+  @apply bg-gradient-to-tl from-slate-700 to-slate-500 text-white;
+}
+.ts-wrapper.argon-select.plugin-remove_button .item .remove {
+  @apply border-0 pl-1 text-white/80;
+}
+.ts-wrapper.argon-select .ts-control input::placeholder,
+.ts-wrapper.argon-select .ts-control input {
+  @apply text-sm text-gray-500 dark:text-white/70;
+}
+.ts-wrapper.argon-select .ts-dropdown {
+  @apply mt-1 rounded-lg border border-solid border-gray-200 bg-white text-sm text-slate-700 shadow-3xl dark:border-white/10 dark:bg-slate-850 dark:text-white;
+}
+.ts-wrapper.argon-select .ts-dropdown .option,
+.ts-wrapper.argon-select .ts-dropdown .create {
+  @apply px-3 py-2;
+}
+.ts-wrapper.argon-select .ts-dropdown .active {
+  @apply bg-gray-100 text-slate-700 dark:bg-slate-900 dark:text-white;
+}
+.ts-wrapper.argon-select .ts-dropdown .optgroup-header {
+  @apply bg-transparent px-3 py-1 text-xxs font-bold uppercase tracking-wider text-slate-400;
+}
+.ts-wrapper.argon-select .ts-dropdown .dropdown-input {
+  @apply rounded-lg border-gray-300 text-sm;
+}
+.ts-wrapper.argon-select.is-invalid .ts-control {
+  @apply border-red-500;
+}
+
+/* ------------------------------------------------------------------
+ * File upload previews / drag & drop zone (see public/assets/js/forms.js)
+ * ------------------------------------------------------------------ */
+[data-dropzone].is-dragover {
+  @apply border-blue-500 bg-blue-500/5;
 }

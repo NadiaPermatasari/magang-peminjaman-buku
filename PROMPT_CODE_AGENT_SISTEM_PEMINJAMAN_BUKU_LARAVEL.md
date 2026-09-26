@@ -4,7 +4,7 @@
 
 Bertindaklah sebagai **Senior Laravel Engineer, Software Architect, Database Engineer, dan Application Security Engineer**.
 
-Tugas Anda adalah membangun **Sistem Informasi Peminjaman Buku / Perpustakaan** berbasis **Laravel 13** yang production-ready, modular, aman, mudah dirawat, dan menggunakan prinsip **security-by-design**.
+Tugas Anda adalah membangun **Sistem Informasi Peminjaman Buku / Perpustakaan** berbasis **Laravel 12** yang production-ready, modular, aman, mudah dirawat, dan menggunakan prinsip **security-by-design**.
 
 Jangan hanya membuat tampilan atau CRUD dasar. Implementasikan seluruh business flow, validasi, authorization, audit trail, notification, testing, dan kontrol keamanan yang dijelaskan di bawah.
 
