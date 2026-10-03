@@ -11,8 +11,8 @@ use Illuminate\Validation\Rule;
 
 /**
  * Application settings, Super Admin only (spec §21). One consolidated form
- * covering identity/branding/loan/fine/notification groups — split into
- * separate screens later if the form grows unwieldy.
+ * covering identity/branding/loan/notification groups — split into separate
+ * screens later if the form grows unwieldy.
  */
 class SettingController extends Controller
 {
@@ -65,13 +65,6 @@ class SettingController extends Controller
             'max_renewals' => ['required', 'integer', 'min:0', 'max:10'],
             'block_if_overdue' => ['nullable', 'boolean'],
 
-            // Denda
-            'fine_enabled' => ['nullable', 'boolean'],
-            'fine_amount_per_day' => ['required', 'integer', 'min:0'],
-            'fine_grace_period' => ['required', 'integer', 'min:0', 'max:30'],
-            'maximum_fine' => ['nullable', 'integer', 'min:0'],
-            'block_if_unpaid_fine' => ['nullable', 'boolean'],
-
             // Notifikasi
             'email_notification_enabled' => ['nullable', 'boolean'],
             'whatsapp_notification_enabled' => ['nullable', 'boolean'],
@@ -100,7 +93,7 @@ class SettingController extends Controller
             }
         }
 
-        foreach (['allow_renewal', 'block_if_overdue', 'fine_enabled', 'block_if_unpaid_fine', 'email_notification_enabled', 'whatsapp_notification_enabled'] as $field) {
+        foreach (['allow_renewal', 'block_if_overdue', 'email_notification_enabled', 'whatsapp_notification_enabled'] as $field) {
             $data[$field] = $request->boolean($field);
         }
 

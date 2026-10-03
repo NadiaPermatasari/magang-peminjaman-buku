@@ -9,39 +9,70 @@ use App\Actions\Loans\HandoverLoan;
 use App\Actions\Loans\RejectLoan;
 use App\Enums\BookCopyStatus;
 use App\Enums\LoanStatus;
+use App\Enums\MemberStatus;
 use App\Exceptions\LoanException;
 use App\Http\Requests\HandoverLoanRequest;
 use App\Http\Requests\RejectLoanRequest;
 use App\Http\Requests\StoreLoanRequest;
+use App\Http\Requests\UploadHandoverPhotoRequest;
 use App\Models\Book;
 use App\Models\Loan;
+use App\Models\LoanItem;
+use App\Models\Member;
+use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class LoanController extends Controller
 {
-    /** "Pengajuan" — the signed-in member's own loan requests (spec §41). */
+    /**
+     * "Pengajuan" (spec §41). Anggota melihat pengajuannya sendiri; petugas
+     * dan admin (loans.view-all) melihat seluruh pengajuan. Akun staf tidak
+     * terhubung ke data anggota, jadi halaman ini tidak boleh menolak mereka
+     * hanya karena itu.
+     */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Loan::class);
 
-        $member = $request->user()->member;
+        $user = $request->user();
+        $seesAll = $user->can('loans.view-all');
+        $member = $user->member;
 
-        abort_unless($member, 403, 'Akun Anda tidak terhubung ke data anggota.');
+        if (! $seesAll && ! $member) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Akun Anda tidak terhubung ke data anggota, sehingga belum bisa mengajukan peminjaman. Hubungi petugas perpustakaan.');
+        }
 
-        $loans = $member->loans()
-            ->with('items.book')
-            ->latest()
-            ->paginate((int) setting('per_page', 10));
+        $status = $request->query('status');
 
-        return view('loans.index', ['loans' => $loans]);
+        $loans = Loan::query()
+            ->when(! $seesAll, fn ($q) => $q->where('member_id', $member->id))
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->with(['member', 'items.book'])
+            ->latest('requested_at')
+            ->paginate((int) setting('per_page', 10))
+            ->withQueryString();
+
+        return view('loans.index', [
+            'loans' => $loans,
+            'seesAll' => $seesAll,
+            'statuses' => LoanStatus::cases(),
+        ]);
     }
 
     public function create(Request $request)
     {
         $this->authorize('create', Loan::class);
 
-        abort_unless($request->user()->member, 403, 'Akun Anda tidak terhubung ke data anggota.');
+        $member = $request->user()->member;
+        $onBehalf = ! $member && $request->user()->can('loans.view-all');
+
+        if (! $member && ! $onBehalf) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Akun Anda tidak terhubung ke data anggota, sehingga belum bisa mengajukan peminjaman. Hubungi petugas perpustakaan.');
+        }
 
         return view('loans.create', [
             'books' => Book::where('is_active', true)
@@ -49,12 +80,26 @@ class LoanController extends Controller
                 ->orderBy('title')
                 ->get(),
             'preselected' => $request->query('book'),
+            // Petugas loket mengajukan atas nama anggota; anggota sendiri
+            // tidak pernah melihat pilihan ini.
+            'onBehalf' => $onBehalf,
+            'members' => $onBehalf
+                ? Member::where('status', MemberStatus::ACTIVE)->orderBy('name')->get()
+                : collect(),
         ]);
     }
 
     public function store(StoreLoanRequest $request, CreateLoan $action): RedirectResponse
     {
         $member = $request->user()->member;
+
+        if (! $member) {
+            // Pengajuan atas nama anggota — hanya untuk staf (loans.view-all),
+            // dipaksakan di StoreLoanRequest lewat aturan member_id.
+            abort_unless($request->user()->can('loans.view-all'), 403);
+
+            $member = Member::findOrFail($request->integer('member_id'));
+        }
 
         try {
             $loan = $action->handle($member, $request->input('book_ids'), $request->input('notes'));
@@ -69,7 +114,12 @@ class LoanController extends Controller
     {
         $this->authorize('view', $loan);
 
-        return view('loans.show', ['loan' => $loan->load(['items.book', 'items.bookCopy', 'items.fine', 'member', 'approvedBy', 'rejectedBy'])]);
+        return view('loans.show', [
+            'loan' => $loan->load([
+                'items.book', 'items.bookCopy', 'member', 'approvedBy', 'rejectedBy',
+                'extensions.requestedBy', 'extensions.decidedBy',
+            ]),
+        ]);
     }
 
     /** "Menunggu Verifikasi" — staff queue. */
@@ -109,7 +159,7 @@ class LoanController extends Controller
         return back()->with('success', "Peminjaman {$loan->code} ditolak.");
     }
 
-    /** "Siap Diambil" — staff handover-by-barcode queue. */
+    /** "Siap Diambil" — antrean serah terima buku ke anggota. */
     public function ready(Request $request)
     {
         $this->authorize('viewAny', Loan::class);
@@ -124,13 +174,40 @@ class LoanController extends Controller
 
     public function handover(HandoverLoanRequest $request, Loan $loan, HandoverLoan $action): RedirectResponse
     {
+        $photoPath = $request->hasFile('photo')
+            ? $request->file('photo')->store('loan-proofs', 'public')
+            : null;
+
         try {
-            $action->handle($loan, $request->string('barcode'), auth()->user());
+            $action->handle($loan, $request->string('barcode'), auth()->user(), $photoPath);
         } catch (LoanException $e) {
             return back()->with('error', $e->getMessage());
         }
 
         return back()->with('success', 'Eksemplar berhasil diserahkan.');
+    }
+
+    /**
+     * Unggah / perbarui bukti foto serah terima dari halaman Peminjaman
+     * Aktif, untuk item yang sudah diserahkan tanpa foto.
+     */
+    public function uploadHandoverPhoto(UploadHandoverPhotoRequest $request, Loan $loan, LoanItem $item): RedirectResponse
+    {
+        abort_unless($item->loan_id === $loan->id, 404);
+
+        // Bukti lama diganti, bukan ditumpuk — hapus filenya agar tidak jadi
+        // sampah di storage (pola yang sama dipakai untuk sampul buku).
+        if ($item->handover_photo_path) {
+            Storage::disk('public')->delete($item->handover_photo_path);
+        }
+
+        $item->update([
+            'handover_photo_path' => $request->file('photo')->store('loan-proofs', 'public'),
+        ]);
+
+        Activity::log('LOAN_HANDOVER_PHOTO_UPLOADED', "Handover proof uploaded for loan {$loan->code}", $loan);
+
+        return back()->with('success', 'Bukti foto berhasil disimpan.');
     }
 
     /** "Peminjaman Aktif" — staff view of everything currently borrowed. */

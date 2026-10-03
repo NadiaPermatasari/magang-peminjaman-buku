@@ -38,16 +38,12 @@ class Setting extends Model
         'loan_duration_days' => 7,
         'max_active_loans' => 3,
         'pickup_deadline_days' => 2,
-        'allow_renewal' => false,
+        // Perpanjangan/banding peminjaman: allow_renewal mematikan fiturnya,
+        // max_renewals membatasi berapa kali satu peminjaman boleh disetujui
+        // perpanjangannya (lihat RequestLoanExtension).
+        'allow_renewal' => true,
         'max_renewals' => 1,
         'block_if_overdue' => true,
-
-        // Denda
-        'fine_enabled' => true,
-        'fine_amount_per_day' => 1000,
-        'fine_grace_period' => 0,
-        'maximum_fine' => null,
-        'block_if_unpaid_fine' => true,
 
         // Notifikasi
         'email_notification_enabled' => true,

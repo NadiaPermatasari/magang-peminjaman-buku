@@ -5,7 +5,7 @@ namespace App\Notifications\Concerns;
 use App\Notifications\Channels\FonnteChannel;
 
 /**
- * Shared via()/toFonnte() behaviour for the loan/fine notification classes,
+ * Shared via()/toFonnte() behaviour for the loan notification classes,
  * all of which follow the same "database always, mail and/or WhatsApp
  * depending on settings" delivery rule (spec §19, §51).
  */

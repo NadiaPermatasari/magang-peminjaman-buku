@@ -3,7 +3,8 @@
 namespace Tests\Feature;
 
 use App\Actions\Loans\CreateLoan;
-use App\Models\Fine;
+use App\Enums\ExtensionStatus;
+use App\Models\LoanExtension;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\Concerns\WithLibraryData;
@@ -75,7 +76,7 @@ class IdorTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_member_cannot_view_another_members_fine(): void
+    public function test_member_cannot_view_another_members_extension_request(): void
     {
         $this->seedRoles();
 
@@ -87,23 +88,21 @@ class IdorTest extends TestCase
         $book = $this->makeBookWithCopy();
         $loan = app(CreateLoan::class)->handle($memberB, [$book->id]);
 
-        Fine::create([
-            'loan_item_id' => $loan->items->first()->id,
-            'member_id' => $memberB->id,
-            'type' => 'LATE_RETURN',
-            'late_days' => 2,
-            'rate' => 1000,
-            'amount' => 123456,
-            'status' => 'UNPAID',
-            'calculated_at' => now(),
+        LoanExtension::create([
+            'loan_id' => $loan->id,
+            'requested_by' => $userB->id,
+            'days' => 5,
+            'reason' => 'Alasan rahasia milik anggota B',
+            'status' => ExtensionStatus::PENDING,
+            'requested_at' => now(),
         ]);
 
-        // fines.index scopes by the caller's own member_id when they lack
-        // the fines.view permission (FineController::index) — B's fine
-        // amount must never appear in A's own list.
-        $response = $this->actingAs($userA)->get('/fines');
+        // loan-extensions.index scopes to the caller's own member when they
+        // lack loan-extensions.view (LoanExtensionController::index) — B's
+        // request must never appear in A's list.
+        $response = $this->actingAs($userA)->get('/loan-extensions');
 
         $response->assertOk();
-        $response->assertDontSee('123.456');
+        $response->assertDontSee('Alasan rahasia milik anggota B');
     }
 }

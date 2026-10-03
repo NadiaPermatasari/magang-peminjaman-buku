@@ -4,8 +4,15 @@
   // only the group containing the current page starts open. Items are
   // gated by permission and only shown once their route actually exists,
   // so modules "light up" as they are built without ever linking dead.
-  //   label, route, active (routeIs pattern), icon, color, permission (null = always visible to authed users), badge
+  //   label, route, active (routeIs pattern), icon, color, permission (null = always
+  //   visible to authed users; an array = visible when the user holds *any* of them), badge
   $unread = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
+
+  // Jumlah pengajuan perpanjangan yang menunggu keputusan — hanya relevan
+  // (dan hanya dihitung) untuk petugas/admin yang berhak memutuskan.
+  $pendingExtensions = auth()->user()?->can('loan-extensions.approve')
+    ? App\Models\LoanExtension::where('status', App\Enums\ExtensionStatus::PENDING)->count()
+    : 0;
 
   $general = [
     ['label' => 'Dashboard',    'route' => 'dashboard',           'active' => 'dashboard',       'icon' => 'ni ni-tv-2',    'color' => 'text-blue-500',    'permission' => 'dashboard.view'],
@@ -18,26 +25,23 @@
     ['label' => 'Buku',           'route' => 'books.index',       'active' => 'books.*',        'icon' => 'ni ni-book-bookmark',  'color' => 'text-blue-500',    'permission' => 'books.view'],
     ['label' => 'Eksemplar Buku', 'route' => 'book-copies.index', 'active' => 'book-copies.*',  'icon' => 'ni ni-single-copy-04', 'color' => 'text-orange-500',  'permission' => 'book-copies.view'],
     ['label' => 'Kategori',       'route' => 'categories.index',  'active' => 'categories.*',   'icon' => 'ni ni-tag',            'color' => 'text-emerald-500', 'permission' => 'categories.view'],
-    ['label' => 'Penulis',        'route' => 'authors.index',     'active' => 'authors.*',      'icon' => 'ni ni-badge',          'color' => 'text-cyan-500',    'permission' => 'authors.view'],
-    ['label' => 'Penerbit',       'route' => 'publishers.index',  'active' => 'publishers.*',   'icon' => 'ni ni-shop',           'color' => 'text-violet-500',  'permission' => 'publishers.view'],
     ['label' => 'Rak',            'route' => 'racks.index',       'active' => 'racks.*',        'icon' => 'ni ni-map-big',        'color' => 'text-slate-700',   'permission' => 'racks.view'],
   ];
 
   $transactions = [
-    ['label' => 'Pengajuan',            'route' => 'loans.index',   'active' => 'loans.index',   'icon' => 'ni ni-cart',              'color' => 'text-blue-500',    'permission' => 'loans.view-own'],
-    ['label' => 'Menunggu Verifikasi',  'route' => 'loans.pending', 'active' => 'loans.pending', 'icon' => 'ni ni-watch-time',        'color' => 'text-orange-500',  'permission' => 'loans.approve'],
-    ['label' => 'Siap Diambil',         'route' => 'loans.ready',   'active' => 'loans.ready',   'icon' => 'ni ni-box-2',             'color' => 'text-cyan-500',    'permission' => 'loans.handover'],
-    ['label' => 'Peminjaman Aktif',     'route' => 'loans.active',  'active' => 'loans.active',  'icon' => 'ni ni-single-copy-04',    'color' => 'text-emerald-500', 'permission' => 'loans.view-all'],
-    ['label' => 'Pengembalian',         'route' => 'returns.index', 'active' => 'returns.*',     'icon' => 'ni ni-cloud-download-95', 'color' => 'text-violet-500',  'permission' => 'returns.process'],
-    ['label' => 'Keterlambatan',        'route' => 'loans.overdue', 'active' => 'loans.overdue', 'icon' => 'ni ni-time-alarm',        'color' => 'text-red-600',     'permission' => 'loans.view-all'],
-    ['label' => 'Denda',                'route' => 'fines.index',   'active' => 'fines.*',       'icon' => 'ni ni-money-coins',       'color' => 'text-yellow-500',  'permission' => 'fines.view'],
+    ['label' => 'Pengajuan',            'route' => 'loans.index',            'active' => 'loans.index',        'icon' => 'ni ni-cart',              'color' => 'text-blue-500',    'permission' => ['loans.view-own', 'loans.view-all']],
+    ['label' => 'Menunggu Verifikasi',  'route' => 'loans.pending',          'active' => 'loans.pending',      'icon' => 'ni ni-watch-time',        'color' => 'text-orange-500',  'permission' => 'loans.approve'],
+    ['label' => 'Siap Diambil',         'route' => 'loans.ready',            'active' => 'loans.ready',        'icon' => 'ni ni-box-2',             'color' => 'text-cyan-500',    'permission' => 'loans.handover'],
+    ['label' => 'Peminjaman Aktif',     'route' => 'loans.active',           'active' => 'loans.active',       'icon' => 'ni ni-single-copy-04',    'color' => 'text-emerald-500', 'permission' => 'loans.view-all'],
+    ['label' => 'Pengembalian',         'route' => 'returns.index',          'active' => 'returns.*',          'icon' => 'ni ni-cloud-download-95', 'color' => 'text-violet-500',  'permission' => 'returns.process'],
+    ['label' => 'Perpanjangan',         'route' => 'loan-extensions.index',  'active' => 'loan-extensions.*',  'icon' => 'ni ni-calendar-grid-58',  'color' => 'text-yellow-500',  'permission' => ['loan-extensions.view', 'loan-extensions.create'], 'badge' => $pendingExtensions],
+    ['label' => 'Keterlambatan',        'route' => 'loans.overdue',          'active' => 'loans.overdue',      'icon' => 'ni ni-time-alarm',        'color' => 'text-red-600',     'permission' => 'loans.view-all'],
   ];
 
   $reports = [
     ['label' => 'Peminjaman',    'route' => 'reports.loans',      'active' => 'reports.loans',      'icon' => 'ni ni-chart-bar-32', 'color' => 'text-blue-500',    'permission' => 'reports.view'],
     ['label' => 'Pengembalian',  'route' => 'reports.returns',    'active' => 'reports.returns',    'icon' => 'ni ni-chart-bar-32', 'color' => 'text-emerald-500', 'permission' => 'reports.view'],
     ['label' => 'Keterlambatan', 'route' => 'reports.overdue',    'active' => 'reports.overdue',    'icon' => 'ni ni-chart-bar-32', 'color' => 'text-red-600',     'permission' => 'reports.view'],
-    ['label' => 'Denda',         'route' => 'reports.fines',      'active' => 'reports.fines',      'icon' => 'ni ni-chart-bar-32', 'color' => 'text-yellow-500',  'permission' => 'reports.view'],
     ['label' => 'Statistik',     'route' => 'reports.statistics', 'active' => 'reports.statistics', 'icon' => 'ni ni-chart-pie-35', 'color' => 'text-violet-500',  'permission' => 'reports.view'],
   ];
 
@@ -59,7 +63,13 @@
         return false;
       }
 
-      return empty($item['permission']) || auth()->user()?->can($item['permission']);
+      if (empty($item['permission'])) {
+        return true;
+      }
+
+      return is_array($item['permission'])
+        ? (bool) auth()->user()?->canAny($item['permission'])
+        : (bool) auth()->user()?->can($item['permission']);
     });
   };
 

@@ -5,14 +5,14 @@ namespace Database\Seeders;
 use App\Enums\BookCondition;
 use App\Enums\BookCopyStatus;
 use App\Enums\MemberStatus;
-use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Category;
 use App\Models\Member;
-use App\Models\Publisher;
 use App\Models\Rack;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -29,12 +29,6 @@ class DemoMasterDataSeeder extends Seeder
 
         $categories = collect(['Fiksi', 'Non-Fiksi', 'Teknologi', 'Sejarah'])
             ->map(fn ($name) => Category::create(['name' => $name, 'slug' => Str::slug($name)]));
-
-        $authors = collect(['Pramoedya Ananta Toer', 'Tere Liye', 'Andrea Hirata', 'Dee Lestari'])
-            ->map(fn ($name) => Author::create(['name' => $name, 'slug' => Str::slug($name)]));
-
-        $publishers = collect(['Gramedia Pustaka Utama', 'Bentang Pustaka', 'Mizan'])
-            ->map(fn ($name) => Publisher::create(['name' => $name, 'slug' => Str::slug($name)]));
 
         $racks = collect([
             ['code' => 'A1', 'name' => 'Rak Fiksi A1', 'location' => 'Lantai 1'],
@@ -53,7 +47,6 @@ class DemoMasterDataSeeder extends Seeder
                 'title' => $title,
                 'slug' => Str::slug($title),
                 'category_id' => $categories->random()->id,
-                'publisher_id' => $publishers->random()->id,
                 'publication_year' => random_int(1990, 2024),
                 'language' => 'Indonesia',
                 'page_count' => random_int(120, 480),
@@ -61,8 +54,6 @@ class DemoMasterDataSeeder extends Seeder
                 'rack_id' => $racks->random()->id,
                 'is_active' => true,
             ]);
-
-            $book->authors()->attach($authors->random(random_int(1, 2))->pluck('id'));
 
             $copyCount = random_int(1, 3);
             for ($c = 1; $c <= $copyCount; $c++) {
@@ -77,6 +68,11 @@ class DemoMasterDataSeeder extends Seeder
             }
         }
 
+        // Anggota demo lengkap dengan akun login, supaya alur peminjaman bisa
+        // dicoba dari sisi peminjam tanpa perlu mengatur email server dulu.
+        // Password diambil dari DEMO_MEMBER_PASSWORD bila diset.
+        $password = env('DEMO_MEMBER_PASSWORD', 'Anggota123!');
+
         $members = [
             ['name' => 'Siti Aminah', 'email' => 'siti.aminah@example.test'],
             ['name' => 'Budi Santoso', 'email' => 'budi.santoso@example.test'],
@@ -84,7 +80,16 @@ class DemoMasterDataSeeder extends Seeder
         ];
 
         foreach ($members as $i => $member) {
+            $user = User::create([
+                'name' => $member['name'],
+                'email' => $member['email'],
+                'password' => Hash::make($password),
+                'email_verified_at' => now(),
+            ]);
+            $user->assignRole('anggota');
+
             $m = new Member([
+                'user_id' => $user->id,
                 'member_number' => 'M-DEMO'.str_pad((string) ($i + 1), 3, '0', STR_PAD_LEFT),
                 'name' => $member['name'],
                 'email' => $member['email'],
@@ -96,5 +101,7 @@ class DemoMasterDataSeeder extends Seeder
             $m->setIdentityNumber((string) random_int(3170000000000000, 3179999999999999));
             $m->save();
         }
+
+        $this->command?->info("Anggota demo dibuat (siti.aminah@example.test dll) dengan password: {$password}");
     }
 }

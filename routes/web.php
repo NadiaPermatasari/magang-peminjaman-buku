@@ -1,20 +1,18 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookCopyController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FineController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanExtensionController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\RackController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnController;
@@ -71,14 +69,13 @@ Route::middleware('auth')->group(function () {
     // checks, not just route middleware — spec §26/§50).
     Route::get('book-copies/lookup', [BookCopyController::class, 'lookup'])->middleware('throttle:search')->name('book-copies.lookup');
     Route::resource('categories', CategoryController::class)->except('show');
-    Route::resource('authors', AuthorController::class)->except('show');
-    Route::resource('publishers', PublisherController::class)->except('show');
     Route::resource('racks', RackController::class)->except('show');
     Route::resource('books', BookController::class)->except('show')->middleware('throttle:upload');
     Route::resource('book-copies', BookCopyController::class)->except('show');
 
     // Keanggotaan
     Route::resource('members', MemberController::class)->except('show');
+    Route::post('members/{member}/account', [MemberController::class, 'account'])->name('members.account');
 
     // Transaksi > Peminjaman (spec §41/§12-17). Static segments (pending,
     // ready, active, overdue, create) are registered before {loan} so they
@@ -93,27 +90,29 @@ Route::middleware('auth')->group(function () {
     Route::get('loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
     Route::post('loans/{loan}/approve', [LoanController::class, 'approve'])->name('loans.approve');
     Route::post('loans/{loan}/reject', [LoanController::class, 'reject'])->name('loans.reject');
-    Route::post('loans/{loan}/handover', [LoanController::class, 'handover'])->name('loans.handover');
+    // Penyerahan dan unggah bukti foto sama-sama menerima file gambar, jadi
+    // keduanya lewat rate limiter upload (spec §32).
+    Route::post('loans/{loan}/handover', [LoanController::class, 'handover'])->middleware('throttle:upload')->name('loans.handover');
+    Route::post('loans/{loan}/items/{item}/photo', [LoanController::class, 'uploadHandoverPhoto'])->middleware('throttle:upload')->name('loans.items.photo');
     Route::post('loans/{loan}/cancel', [LoanController::class, 'cancel'])->name('loans.cancel');
 
-    // Transaksi > Pengembalian
-    Route::get('returns', [ReturnController::class, 'index'])->name('returns.index');
-    Route::post('returns', [ReturnController::class, 'store'])->name('returns.store');
+    // Transaksi > Perpanjangan / Banding Peminjaman. Anggota mengajukan dari
+    // halaman detail peminjaman, petugas/admin menyetujui atau menolak.
+    Route::get('loan-extensions', [LoanExtensionController::class, 'index'])->name('loan-extensions.index');
+    Route::post('loans/{loan}/extensions', [LoanExtensionController::class, 'store'])->name('loan-extensions.store');
+    Route::post('loan-extensions/{extension}/approve', [LoanExtensionController::class, 'approve'])->name('loan-extensions.approve');
+    Route::post('loan-extensions/{extension}/reject', [LoanExtensionController::class, 'reject'])->name('loan-extensions.reject');
 
-    // Transaksi > Denda. Waiving is restricted to fines.waive + a mandatory
-    // reason + audit log (spec §18/§58); password re-confirmation is not in
-    // spec §6's minimal list here, and this is a one-field inline form with
-    // no preceding "view" step to attach the confirm-first pattern to.
-    Route::get('fines', [FineController::class, 'index'])->name('fines.index');
-    Route::post('fines/{fine}/mark-paid', [FineController::class, 'markPaid'])->name('fines.mark-paid');
-    Route::post('fines/{fine}/waive', [FineController::class, 'waive'])->name('fines.waive');
+    // Transaksi > Pengembalian. Petugas memilih eksemplar yang sedang
+    // dipinjam lalu mengunggah foto bukti pengembalian (tanpa scan barcode).
+    Route::get('returns', [ReturnController::class, 'index'])->name('returns.index');
+    Route::post('returns', [ReturnController::class, 'store'])->middleware('throttle:upload')->name('returns.store');
 
     // Laporan (spec §45)
     Route::middleware('permission:reports.view')->group(function () {
         Route::get('reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
         Route::get('reports/returns', [ReportController::class, 'returns'])->name('reports.returns');
         Route::get('reports/overdue', [ReportController::class, 'overdue'])->name('reports.overdue');
-        Route::get('reports/fines', [ReportController::class, 'fines'])->name('reports.fines');
         Route::get('reports/statistics', [ReportController::class, 'statistics'])->name('reports.statistics');
     });
 

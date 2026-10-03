@@ -12,7 +12,6 @@ use App\Enums\BookCondition;
 use App\Enums\BookCopyStatus;
 use App\Enums\LoanStatus;
 use App\Exceptions\LoanException;
-use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithLibraryData;
 use Tests\TestCase;
@@ -112,39 +111,29 @@ class LoanFlowTest extends TestCase
         $loan = app(CreateLoan::class)->handle($member, [$book->id]);
         $loan = app(ApproveLoan::class)->handle($loan, $staff);
         $barcode = $loan->items->first()->bookCopy->barcode;
-        $loan = app(HandoverLoan::class)->handle($loan, $barcode, $staff);
+        $loan = app(HandoverLoan::class)->handle($loan, $barcode, $staff, 'loan-proofs/handover.jpg');
 
-        $result = app(ReturnLoan::class)->handle($barcode, BookCondition::GOOD, $staff);
+        $result = app(ReturnLoan::class)->handle($loan->items->first(), BookCondition::GOOD, $staff, 'loan-proofs/return.jpg');
 
         $this->assertSame(LoanStatus::RETURNED, $result['loan']->status);
         $this->assertSame(BookCopyStatus::AVAILABLE, $result['item']->bookCopy->status);
-        $this->assertNull($result['fine']);
+        $this->assertSame('loan-proofs/return.jpg', $result['item']->return_photo_path);
+        $this->assertSame('loan-proofs/handover.jpg', $result['item']->handover_photo_path);
     }
 
-    public function test_returning_late_creates_a_fine(): void
+    public function test_return_requires_the_item_to_be_borrowed(): void
     {
         $this->seedRoles();
         $member = $this->makeMember($this->makeUser('anggota'));
         $staff = $this->makeUser('petugas');
         $book = $this->makeBookWithCopy();
 
-        Setting::set('fine_amount_per_day', 1000);
-        Setting::set('fine_grace_period', 0);
-        Setting::set('fine_enabled', true);
-
+        // Masih PENDING — belum pernah diserahkan ke anggota.
         $loan = app(CreateLoan::class)->handle($member, [$book->id]);
-        $loan = app(ApproveLoan::class)->handle($loan, $staff);
-        $barcode = $loan->items->first()->bookCopy->barcode;
-        $loan = app(HandoverLoan::class)->handle($loan, $barcode, $staff);
 
-        // Backdate due_at to simulate 3 late days.
-        $loan->items()->update(['due_at' => now()->subDays(3)]);
+        $this->expectException(LoanException::class);
 
-        $result = app(ReturnLoan::class)->handle($barcode, BookCondition::GOOD, $staff);
-
-        $this->assertNotNull($result['fine']);
-        $this->assertSame(3, $result['fine']->late_days);
-        $this->assertSame(3000, $result['fine']->amount);
+        app(ReturnLoan::class)->handle($loan->items->first(), BookCondition::GOOD, $staff, 'loan-proofs/return.jpg');
     }
 
     public function test_expiring_an_approved_loan_releases_the_copy(): void

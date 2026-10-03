@@ -32,6 +32,7 @@
             <th class="{{ $th }}">No. Anggota</th>
             <th class="{{ $th }}">Nama</th>
             <th class="{{ $th }}">Kontak</th>
+            <th class="{{ $th }} text-center">Akun Login</th>
             <th class="{{ $th }} text-center">Status</th>
             <th class="{{ $th }} text-center">Bergabung</th>
             <th class="{{ $th }} text-center">Aksi</th>
@@ -41,8 +42,17 @@
           @forelse ($members as $member)
             <tr>
               <td class="{{ $td }} text-sm font-semibold dark:text-white">{{ $member->member_number }}</td>
-              <td class="{{ $td }} text-sm dark:text-white">{{ $member->name }} @if ($member->user)<i class="ml-1 text-xs text-emerald-500 fas fa-user-check" title="Punya akun login"></i>@endif</td>
+              <td class="{{ $td }} text-sm dark:text-white">{{ $member->name }}</td>
               <td class="{{ $td }} text-xs text-slate-400">{{ $member->email ?: '—' }}</td>
+              <td class="{{ $td }} text-center text-xs">
+                @if ($member->user)
+                  <span class="text-emerald-600"><i class="mr-1 fas fa-user-check"></i>Aktif</span>
+                @elseif (auth()->user()->can('update', $member))
+                  <a href="{{ route('members.edit', $member) }}" class="font-semibold text-orange-600 hover:underline"><i class="mr-1 fas fa-user-plus"></i>Buat akun</a>
+                @else
+                  <span class="text-slate-400">—</span>
+                @endif
+              </td>
               <td class="{{ $td }} text-center">
                 <span class="bg-gradient-to-tl {{ $member->status->badgeColor() }} px-2.5 text-xs rounded-1.8 py-1.4 inline-block whitespace-nowrap text-center align-baseline font-bold uppercase leading-none text-white">{{ $member->status->label() }}</span>
               </td>
@@ -60,7 +70,7 @@
               </td>
             </tr>
           @empty
-            <tr><td colspan="6" class="p-6 text-sm text-center dark:text-white/80">Belum ada anggota.</td></tr>
+            <tr><td colspan="7" class="p-6 text-sm text-center dark:text-white/80">Belum ada anggota.</td></tr>
           @endforelse
         </tbody>
       </table>

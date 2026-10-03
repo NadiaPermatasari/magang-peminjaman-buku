@@ -12,29 +12,33 @@ use App\Support\Activity;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Petugas scans a barcode to hand a reserved copy over to the member (spec
- * §15/§61). One call per scanned copy — when the last remaining item of the
- * loan is handed over, the loan itself flips to BORROWED.
+ * Petugas menyerahkan satu eksemplar yang sudah direservasi ke anggota
+ * (spec §15/§61), dengan bukti foto serah terima bila diunggah. Satu
+ * pemanggilan per eksemplar — begitu item terakhir diserahkan, peminjaman
+ * ikut berubah menjadi BORROWED.
  */
 class HandoverLoan
 {
-    public function handle(Loan $loan, string $barcode, User $actor, ?string $conditionOnBorrow = null): Loan
+    /**
+     * @param  string|null  $photoPath  Path bukti foto pada disk `public`.
+     */
+    public function handle(Loan $loan, string $barcode, User $actor, ?string $photoPath = null, ?string $conditionOnBorrow = null): Loan
     {
         if ($loan->status !== LoanStatus::APPROVED) {
             throw new LoanException("Peminjaman berstatus {$loan->status->label()} tidak dapat diserahkan.");
         }
 
-        DB::transaction(function () use ($loan, $barcode, $conditionOnBorrow) {
+        DB::transaction(function () use ($loan, $barcode, $photoPath, $conditionOnBorrow) {
             $copy = BookCopy::query()->where('barcode', $barcode)->lockForUpdate()->first();
 
             if (! $copy) {
-                throw new LoanException('Barcode tidak ditemukan.');
+                throw new LoanException('Eksemplar tidak ditemukan.');
             }
 
             $item = $loan->items()->where('book_copy_id', $copy->id)->where('status', LoanStatus::APPROVED)->first();
 
             if (! $item) {
-                throw new LoanException('Barcode ini bukan eksemplar yang direservasi untuk pengajuan ini.');
+                throw new LoanException('Eksemplar ini bukan eksemplar yang direservasi untuk pengajuan ini.');
             }
 
             if (! $copy->status->canTransitionTo(BookCopyStatus::BORROWED)) {
@@ -49,6 +53,7 @@ class HandoverLoan
                 'borrowed_at' => now(),
                 'due_at' => $dueAt,
                 'condition_on_borrow' => $conditionOnBorrow ?? $copy->condition->value,
+                'handover_photo_path' => $photoPath ?? $item->handover_photo_path,
             ]);
 
             $remaining = $loan->items()->where('status', '!=', LoanStatus::BORROWED)->count();

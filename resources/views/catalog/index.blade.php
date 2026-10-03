@@ -24,7 +24,7 @@
             <img src="{{ $book->cover_url ?? asset('assets/img/theme/bootstrap.jpg') }}" class="object-cover w-full h-48 rounded-t-2xl" alt="{{ $book->title }}" />
             <div class="flex-auto p-4">
               <h6 class="mb-1 text-sm dark:text-white">{{ $book->title }}</h6>
-              <p class="mb-2 text-xs text-slate-400">{{ $book->authors->pluck('name')->join(', ') ?: 'Tanpa penulis' }}</p>
+              <p class="mb-2 text-xs text-slate-400">{{ $book->category?->name ?: 'Tanpa kategori' }}</p>
               <span class="px-2 py-0.5 text-xxs font-bold uppercase rounded-md {{ $book->available_count > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600' }}">
                 {{ $book->available_count > 0 ? $book->available_count.' tersedia' : 'Tidak tersedia' }}
               </span>

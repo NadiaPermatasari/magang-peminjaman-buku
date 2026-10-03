@@ -76,8 +76,6 @@ class SettingsTest extends TestCase
             'max_active_loans' => 3,
             'pickup_deadline_days' => 2,
             'max_renewals' => 1,
-            'fine_amount_per_day' => 1000,
-            'fine_grace_period' => 0,
             'pickup_reminder_hours' => 24,
             'primary_color' => '#5e72e4',
         ], $overrides);

@@ -7,7 +7,6 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Category;
 use App\Models\Member;
-use App\Models\Publisher;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Support\Str;
@@ -57,7 +56,6 @@ trait WithLibraryData
             'title' => 'Buku Test '.Str::random(6),
             'slug' => Str::slug('buku-test-'.Str::random(6)),
             'category_id' => Category::factory()->create()->id,
-            'publisher_id' => Publisher::factory()->create()->id,
             'is_active' => true,
         ], $bookAttributes));
 

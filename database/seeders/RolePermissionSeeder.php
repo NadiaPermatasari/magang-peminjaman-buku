@@ -22,17 +22,15 @@ class RolePermissionSeeder extends Seeder
         'books.view', 'books.create', 'books.update', 'books.delete',
         'book-copies.view', 'book-copies.create', 'book-copies.update', 'book-copies.delete',
         'categories.view', 'categories.create', 'categories.update', 'categories.delete',
-        'authors.view', 'authors.create', 'authors.update', 'authors.delete',
-        'publishers.view', 'publishers.create', 'publishers.update', 'publishers.delete',
         'racks.view', 'racks.create', 'racks.update', 'racks.delete',
 
         'members.view', 'members.create', 'members.update', 'members.delete',
 
         'loans.create', 'loans.view-own', 'loans.view-all', 'loans.approve', 'loans.reject', 'loans.handover', 'loans.cancel',
 
-        'returns.process',
+        'loan-extensions.create', 'loan-extensions.view', 'loan-extensions.approve',
 
-        'fines.view-own', 'fines.view', 'fines.mark-paid', 'fines.waive',
+        'returns.process',
 
         'reports.view', 'reports.export',
 
@@ -56,30 +54,30 @@ class RolePermissionSeeder extends Seeder
             'books.view', 'books.create', 'books.update', 'books.delete',
             'book-copies.view', 'book-copies.create', 'book-copies.update', 'book-copies.delete',
             'categories.view', 'categories.create', 'categories.update', 'categories.delete',
-            'authors.view', 'authors.create', 'authors.update', 'authors.delete',
-            'publishers.view', 'publishers.create', 'publishers.update', 'publishers.delete',
             'racks.view', 'racks.create', 'racks.update', 'racks.delete',
             'members.view', 'members.create', 'members.update', 'members.delete',
-            'loans.view-all', 'loans.approve', 'loans.reject', 'loans.handover', 'loans.cancel',
+            // loans.create: petugas loket boleh mengajukan atas nama anggota
+            // (anggota memilih sendiri dari akunnya, staf dari halaman Pengajuan).
+            'loans.create', 'loans.view-all', 'loans.approve', 'loans.reject', 'loans.handover', 'loans.cancel',
+            'loan-extensions.view', 'loan-extensions.approve',
             'returns.process',
-            'fines.view', 'fines.mark-paid',
             'reports.view', 'reports.export',
         ],
 
         'petugas' => [
             'dashboard.view',
-            'books.view', 'book-copies.view', 'categories.view', 'authors.view', 'publishers.view', 'racks.view',
+            'books.view', 'book-copies.view', 'categories.view', 'racks.view',
             'members.view',
-            'loans.view-all', 'loans.approve', 'loans.reject', 'loans.handover',
+            'loans.create', 'loans.view-all', 'loans.approve', 'loans.reject', 'loans.handover',
+            'loan-extensions.view', 'loan-extensions.approve',
             'returns.process',
-            'fines.view', 'fines.mark-paid',
         ],
 
         'anggota' => [
             'dashboard.view',
             'books.view',
             'loans.create', 'loans.view-own', 'loans.cancel',
-            'fines.view-own',
+            'loan-extensions.create',
         ],
 
         'pimpinan' => [
@@ -93,6 +91,12 @@ class RolePermissionSeeder extends Seeder
         foreach (self::PERMISSIONS as $name) {
             Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
+
+        // Katalog permission bersifat code-defined: permission yang sudah
+        // tidak ada di sini (mis. sisa modul yang dihapus) ikut dibuang
+        // beserta penugasannya ke role, supaya halaman Role/Permission
+        // tidak menampilkan hak akses yang tidak punya layar lagi.
+        Permission::where('guard_name', 'web')->whereNotIn('name', self::PERMISSIONS)->delete();
 
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
         $superAdmin->syncPermissions(self::PERMISSIONS);

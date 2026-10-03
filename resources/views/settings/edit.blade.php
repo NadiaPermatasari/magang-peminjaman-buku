@@ -82,33 +82,13 @@
               <x-form.input name="pickup_deadline_days" label="Batas pengambilan (hari)" type="number" min="1" :value="$settings['pickup_deadline_days']" required />
             </div>
             <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.input name="max_renewals" label="Maks. perpanjangan" type="number" min="0" :value="$settings['max_renewals']" required />
+              <x-form.input name="max_renewals" label="Maks. perpanjangan" type="number" min="0" :value="$settings['max_renewals']" required help="Berapa kali satu peminjaman boleh diperpanjang. 0 = tidak boleh." />
             </div>
             <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.toggle name="allow_renewal" label="Izinkan perpanjangan" :checked="(bool) $settings['allow_renewal']" />
+              <x-form.toggle name="allow_renewal" label="Izinkan perpanjangan / banding" :checked="(bool) $settings['allow_renewal']" help="Anggota dapat mengajukan perpanjangan untuk disetujui petugas." />
             </div>
             <div class="w-full max-w-full px-3 md:w-4/12">
               <x-form.toggle name="block_if_overdue" label="Blokir jika ada keterlambatan" :checked="(bool) $settings['block_if_overdue']" />
-            </div>
-          </div>
-        </x-card>
-
-        <x-card title="Denda" class="mb-6">
-          <div class="flex flex-wrap -mx-3">
-            <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.input name="fine_amount_per_day" label="Denda per hari (Rp)" type="number" min="0" :value="$settings['fine_amount_per_day']" required />
-            </div>
-            <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.input name="fine_grace_period" label="Masa tenggang (hari)" type="number" min="0" :value="$settings['fine_grace_period']" required />
-            </div>
-            <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.input name="maximum_fine" label="Denda maksimum (Rp, opsional)" type="number" min="0" :value="$settings['maximum_fine']" />
-            </div>
-            <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.toggle name="fine_enabled" label="Aktifkan denda" :checked="(bool) $settings['fine_enabled']" />
-            </div>
-            <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.toggle name="block_if_unpaid_fine" label="Blokir jika ada denda belum lunas" :checked="(bool) $settings['block_if_unpaid_fine']" />
             </div>
           </div>
         </x-card>

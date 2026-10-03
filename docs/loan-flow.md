@@ -1,4 +1,4 @@
-# Alur Peminjaman, Pengembalian & Denda
+# Alur Peminjaman, Pengembalian & Perpanjangan
 
 ## Diagram Status
 
@@ -15,16 +15,17 @@ Anggota mengajukan (CreateLoan)
         ▼
      APPROVED ──── tidak diambil sebelum pickup_deadline ────┐
         │                                                     │ (ExpireLoan,
-        │ scan barcode per eksemplar                          │  via scheduler)
+        │ pilih eksemplar + bukti foto                        │  via scheduler)
         │ (HandoverLoan)                                      ▼
         ▼                                                  EXPIRED (selesai,
      BORROWED ──── melewati due_at ────┐                    eksemplar dilepas)
-        │                              │ (MarkOverdueLoans,
-        │ scan barcode saat kembali    │  via scheduler)
-        │ (ReturnLoan → CalculateFine) ▼
-        │                          OVERDUE
-        │                              │
-        │◄─────── scan barcode saat kembali (ReturnLoan) ─────┘
+        │     ▲                        │ (MarkOverdueLoans,
+        │     │ perpanjangan disetujui │  via scheduler)
+        │     │ (ApproveLoanExtension) ▼
+        │     └───────────────────── OVERDUE
+        │ pilih item + unggah            │
+        │ bukti foto (ReturnLoan)        │
+        │◄───── pilih item + bukti foto (ReturnLoan) ─────────┘
         ▼
      RETURNED (selesai)
 
@@ -39,7 +40,9 @@ Transisi legal didefinisikan terpusat di `App\Enums\LoanStatus::transitions()` �
 | Aksi | Lock |
 |---|---|
 | `ApproveLoan` | `BookCopy::where('book_id', …)->where('status', AVAILABLE)->lockForUpdate()` — dua approval bersamaan untuk buku yang sama tidak bisa mengambil eksemplar yang sama (dites di `LoanFlowTest::test_a_book_copy_cannot_be_allocated_to_two_loans_at_once`). |
-| `HandoverLoan` / `ReturnLoan` | `BookCopy::where('barcode', …)->lockForUpdate()` sebelum transisi status. |
+| `HandoverLoan` | `BookCopy::where('barcode', …)->lockForUpdate()` sebelum transisi status. |
+| `ReturnLoan` | `LoanItem::whereKey(…)->lockForUpdate()` lalu validasi ulang statusnya di dalam transaksi — dua petugas tidak bisa memproses pengembalian item yang sama. |
+| `RequestLoanExtension` | Pengajuan PENDING milik peminjaman yang sama di-`lockForUpdate()` — tidak bisa ada dua pengajuan menunggu sekaligus. |
 | Pembuatan kode peminjaman | Baris counter harian di `loan_number_sequences` di-`lockForUpdate()` di dalam transaksi (lihat `docs/architecture.md`). |
 
 ## Eligibilitas Peminjaman (`CreateLoan`, spec §14)
@@ -49,18 +52,31 @@ Ditolak (`LoanException`, ditangkap controller → flash error) bila:
 - Anggota tidak `ACTIVE` atau `expired_at` telah lewat (`Member::isActive()`)
 - Jumlah item aktif (PENDING/APPROVED/BORROWED/OVERDUE) + permintaan baru melebihi `max_active_loans`
 - `block_if_overdue` aktif **dan** anggota punya peminjaman berstatus OVERDUE
-- `block_if_unpaid_fine` aktif **dan** anggota punya denda UNPAID
 - Salah satu buku tidak aktif atau tidak punya eksemplar berstatus AVAILABLE saat pengajuan (pengecekan awal — alokasi sebenarnya baru terjadi saat approve)
 
-## Denda (`CalculateFine`, spec §16/§18)
+Petugas/admin (`loans.view-all`) yang akunnya tidak terhubung ke data anggota mengajukan **atas nama** anggota: `member_id` wajib diisi di form Pengajuan. Anggota tidak pernah bisa memakai field itu untuk mengajukan atas nama orang lain — `LoanController::store` selalu memakai `member` milik akunnya sendiri bila ada.
+
+## Perpanjangan / Banding (`RequestLoanExtension`, `ApproveLoanExtension`, `RejectLoanExtension`)
+
+Anggota mengajukan tambahan hari dari halaman detail peminjaman; petugas/admin (`loan-extensions.approve`) menyetujui atau menolak dari menu **Transaksi > Perpanjangan**.
+
+Pengajuan ditolak sistem (`LoanException`) bila: pengaturan `allow_renewal` nonaktif, `max_renewals` sudah tercapai (atau bernilai 0), peminjaman tidak berstatus BORROWED/OVERDUE, atau masih ada pengajuan PENDING untuk peminjaman yang sama.
+
+Saat disetujui:
 
 ```
-late_days = due_at → returned_at (hari, floor)
-billable_days = late_days − fine_grace_period
-amount = billable_days × fine_amount_per_day, dibatasi maximum_fine bila diisi
+base      = due_at bila masih di masa depan, selain itu now()
+new_due_at = base + days
 ```
 
-Tidak ada denda dibuat bila `fine_enabled = false`, `late_days ≤ fine_grace_period`, atau `amount ≤ 0`. Konfigurasi selalu dibaca dari `settings` (cached), **tidak pernah** hardcode.
+`due_at` peminjaman **dan** seluruh item yang belum kembali digeser ke `new_due_at`. Peminjaman OVERDUE kembali ke BORROWED (satu-satunya transisi OVERDUE → BORROWED yang legal di `LoanStatus::transitions()`). Penolakan tidak mengubah jatuh tempo dan wajib menyertakan alasan, yang dikirimkan ke anggota.
+
+## Bukti Foto (pengganti scan barcode)
+
+- **Serah terima** — `loan_items.handover_photo_path`, diunggah saat HandoverLoan (opsional) atau menyusul dari halaman **Peminjaman Aktif**.
+- **Pengembalian** — `loan_items.return_photo_path`, **wajib**: petugas memilih eksemplar dari daftar peminjaman aktif lalu mengunggah fotonya, tidak ada lagi input barcode.
+
+Keduanya disimpan di disk `public` (`storage/app/public/loan-proofs`), divalidasi sebagai gambar (MIME dibaca dari isi file, maks 4 MB) dan lewat rate limiter `upload`.
 
 ## Kondisi Eksemplar Saat Kembali
 

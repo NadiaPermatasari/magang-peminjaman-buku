@@ -15,8 +15,8 @@ class SeoController extends Controller
 {
     private const DISALLOWED_PREFIXES = [
         '/dashboard', '/profile', '/catalog', '/books', '/book-copies',
-        '/categories', '/authors', '/publishers', '/racks', '/members',
-        '/loans', '/returns', '/fines', '/reports', '/users', '/audit-logs',
+        '/categories', '/racks', '/members',
+        '/loans', '/loan-extensions', '/returns', '/reports', '/users', '/audit-logs',
         '/settings', '/security-dashboard', '/notifications',
     ];
 

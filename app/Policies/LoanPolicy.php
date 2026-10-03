@@ -46,6 +46,17 @@ class LoanPolicy
         return $user->can('loans.handover') && $loan->status === LoanStatus::APPROVED;
     }
 
+    /**
+     * Bukti foto serah terima boleh diunggah/diperbarui petugas selama
+     * peminjaman belum selesai — termasuk dari halaman Peminjaman Aktif,
+     * untuk item yang tadinya diserahkan tanpa foto.
+     */
+    public function uploadHandoverPhoto(User $user, Loan $loan): bool
+    {
+        return ($user->can('loans.handover') || $user->can('returns.process'))
+            && in_array($loan->status, [LoanStatus::APPROVED, LoanStatus::BORROWED, LoanStatus::OVERDUE], true);
+    }
+
     public function cancel(User $user, Loan $loan): bool
     {
         if (! in_array($loan->status, [LoanStatus::PENDING, LoanStatus::APPROVED], true)) {

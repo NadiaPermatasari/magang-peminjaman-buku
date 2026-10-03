@@ -7,9 +7,9 @@ Didefinisikan di `database/seeders/RolePermissionSeeder.php` (idempotent — ama
 | Role | Ringkasan |
 |---|---|
 | `super-admin` | Seluruh permission. Satu-satunya yang bisa mengelola User/Role/Permission, Pengaturan (termasuk keamanan), dan melihat Audit Log/Security Dashboard penuh. |
-| `admin-perpustakaan` | Kelola penuh master data (buku, eksemplar, kategori, penulis, penerbit, rak), anggota, verifikasi & kelola seluruh transaksi peminjaman/pengembalian/denda (kecuali *waive*), laporan. |
-| `petugas` | Lihat master data, verifikasi peminjaman, penyerahan (handover), pengembalian, tandai denda lunas. Tidak bisa ubah master data. |
-| `anggota` | Lihat katalog, ajukan/batalkan peminjaman sendiri, lihat riwayat & denda sendiri. |
+| `admin-perpustakaan` | Kelola penuh master data (buku, eksemplar, kategori, rak), anggota beserta akun loginnya, verifikasi & kelola seluruh transaksi peminjaman/pengembalian/perpanjangan, laporan. |
+| `petugas` | Lihat master data, ajukan peminjaman atas nama anggota, verifikasi peminjaman, penyerahan (handover), pengembalian, putuskan perpanjangan. Tidak bisa ubah master data. |
+| `anggota` | Lihat katalog, ajukan/batalkan peminjaman sendiri, ajukan perpanjangan, lihat riwayatnya sendiri. |
 | `pimpinan` | Read-only — dashboard & laporan saja. |
 
 ## Katalog Permission
@@ -20,8 +20,6 @@ dashboard.view
 books.view / books.create / books.update / books.delete
 book-copies.view / book-copies.create / book-copies.update / book-copies.delete
 categories.view / categories.create / categories.update / categories.delete
-authors.view / authors.create / authors.update / authors.delete
-publishers.view / publishers.create / publishers.update / publishers.delete
 racks.view / racks.create / racks.update / racks.delete
 
 members.view / members.create / members.update / members.delete
@@ -29,9 +27,9 @@ members.view / members.create / members.update / members.delete
 loans.create / loans.view-own / loans.view-all / loans.approve /
 loans.reject / loans.handover / loans.cancel
 
-returns.process
+loan-extensions.create / loan-extensions.view / loan-extensions.approve
 
-fines.view-own / fines.view / fines.mark-paid / fines.waive
+returns.process
 
 reports.view / reports.export
 
@@ -42,7 +40,9 @@ audit-logs.view
 security-dashboard.view
 ```
 
-`fines.waive` sengaja **tidak** diberikan ke `admin-perpustakaan` — pembebasan denda dibatasi hanya untuk `super-admin` sesuai default aman spec §58 ("fine waiver = restricted"). Beri secara eksplisit lewat layar Role bila instansi memang membutuhkannya.
+Katalog ini bersifat *code-defined*: `RolePermissionSeeder` juga **menghapus** permission di database yang sudah tidak ada di daftar ini, beserta penugasannya ke role — mis. sisa `fines.*`, `authors.*`, dan `publishers.*` dari modul yang sudah dihapus.
+
+`loan-extensions.create` hanya dipegang `anggota` (pengaju), sedangkan `loan-extensions.approve` hanya dipegang petugas/admin — satu akun tidak pernah bisa menyetujui pengajuan perpanjangannya sendiri.
 
 ## Menambah Permission Baru
 
@@ -53,7 +53,7 @@ security-dashboard.view
 
 ## Object-Level Authorization (IDOR)
 
-Permission saja tidak cukup untuk mencegah satu anggota melihat data anggota lain (spec §26). Setiap model yang punya "pemilik" (Loan, Fine, Member) menggunakan Policy dengan pola:
+Permission saja tidak cukup untuk mencegah satu anggota melihat data anggota lain (spec §26). Setiap model yang punya "pemilik" (Loan, LoanExtension, Member) menggunakan Policy dengan pola:
 
 ```php
 public function view(User $user, Loan $loan): bool

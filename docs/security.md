@@ -5,7 +5,7 @@ Baseline: OWASP ASVS Level 2 (spec §57). Setiap kontrol di bawah ini adalah imp
 ## Broken Access Control / IDOR
 
 - Setiap route sensitif digerbangi **middleware permission** (lapis pertama) **dan Policy** (lapis kedua, object-level) — lihat `app/Policies/*`.
-- Pola IDOR eksplisit di `LoanPolicy`, `FinePolicy`, `MemberPolicy`: `$user->can('...view-all')` atau `$resource->member->user_id === $user->id`.
+- Pola IDOR eksplisit di `LoanPolicy`, `LoanExtensionPolicy`, `MemberPolicy`: `$user->can('...view-all')` atau `$resource->member->user_id === $user->id`.
 - UUID (`App\Support\Concerns\HasUuid`) dipakai di semua URL publik, **tapi bukan pengganti otorisasi** — resource acak menghasilkan 404 (tidak ditemukan lewat route-model-binding), resource milik orang lain menghasilkan 403 (ditolak Policy). Dites di `tests/Feature/IdorTest.php`.
 - Tidak ada Gate::before bypass global untuk super-admin — super-admin lolos karena permission-nya memang lengkap (di-seed eksplisit), bukan lewat jalan pintas yang melewati Policy (lihat `AppServiceProvider::boot()`).
 

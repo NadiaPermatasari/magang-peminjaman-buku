@@ -7,7 +7,7 @@ use App\Enums\LoanStatus;
 use App\Support\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class LoanItem extends Model
 {
@@ -16,7 +16,8 @@ class LoanItem extends Model
     protected $fillable = [
         'loan_id', 'book_id', 'book_copy_id', 'status',
         'borrowed_at', 'due_at', 'returned_at',
-        'condition_on_borrow', 'condition_on_return', 'notes',
+        'condition_on_borrow', 'condition_on_return',
+        'handover_photo_path', 'return_photo_path', 'notes',
     ];
 
     protected function casts(): array
@@ -46,8 +47,15 @@ class LoanItem extends Model
         return $this->belongsTo(BookCopy::class);
     }
 
-    public function fine(): HasOne
+    /** URL bukti foto serah terima buku ke anggota (null bila belum diunggah). */
+    public function getHandoverPhotoUrlAttribute(): ?string
     {
-        return $this->hasOne(Fine::class);
+        return $this->handover_photo_path ? Storage::disk('public')->url($this->handover_photo_path) : null;
+    }
+
+    /** URL bukti foto pengembalian buku (null bila belum diunggah). */
+    public function getReturnPhotoUrlAttribute(): ?string
+    {
+        return $this->return_photo_path ? Storage::disk('public')->url($this->return_photo_path) : null;
     }
 }

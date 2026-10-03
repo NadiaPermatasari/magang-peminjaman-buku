@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
-use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
-use App\Models\Publisher;
 use App\Models\Rack;
 use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +22,7 @@ class BookController extends Controller
         $categoryId = $request->query('category');
 
         $books = Book::query()
-            ->with(['category', 'publisher', 'authors'])
+            ->with('category')
             ->withCount('copies')
             ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%")->orWhere('isbn', 'like', "%{$search}%"))
             ->when($categoryId, fn ($q) => $q->where('category_id', $categoryId))
@@ -45,15 +43,13 @@ class BookController extends Controller
         return view('books.create', [
             'book' => new Book,
             'categories' => Category::orderBy('name')->get(),
-            'publishers' => Publisher::orderBy('name')->get(),
             'racks' => Rack::orderBy('code')->get(),
-            'authors' => Author::orderBy('name')->get(),
         ]);
     }
 
     public function store(StoreBookRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['cover', 'authors']);
+        $data = $request->safe()->except('cover');
         $data['is_active'] = $request->boolean('is_active', true);
         $data['created_by'] = $request->user()->id;
         $data['updated_by'] = $request->user()->id;
@@ -63,7 +59,6 @@ class BookController extends Controller
         }
 
         $book = Book::create($data);
-        $book->authors()->sync($request->input('authors', []));
 
         Activity::log('BOOK_CREATED', "Created book {$book->title}", $book);
 
@@ -75,17 +70,15 @@ class BookController extends Controller
         $this->authorize('update', $book);
 
         return view('books.edit', [
-            'book' => $book->load('authors'),
+            'book' => $book,
             'categories' => Category::orderBy('name')->get(),
-            'publishers' => Publisher::orderBy('name')->get(),
             'racks' => Rack::orderBy('code')->get(),
-            'authors' => Author::orderBy('name')->get(),
         ]);
     }
 
     public function update(UpdateBookRequest $request, Book $book): RedirectResponse
     {
-        $data = $request->safe()->except(['cover', 'authors']);
+        $data = $request->safe()->except('cover');
         $data['is_active'] = $request->boolean('is_active', true);
         $data['updated_by'] = $request->user()->id;
 
@@ -97,7 +90,6 @@ class BookController extends Controller
         }
 
         $book->update($data);
-        $book->authors()->sync($request->input('authors', []));
 
         Activity::log('BOOK_UPDATED', "Updated book {$book->title}", $book);
 

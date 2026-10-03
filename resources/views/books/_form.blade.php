@@ -1,10 +1,7 @@
 @php
   $isEdit = $book->exists;
   $categoryOptions = $categories->pluck('name', 'id')->all();
-  $publisherOptions = $publishers->pluck('name', 'id')->all();
   $rackOptions = $racks->mapWithKeys(fn ($r) => [$r->id => "{$r->code} — {$r->name}"])->all();
-  $authorOptions = $authors->pluck('name', 'id')->all();
-  $selectedAuthors = $isEdit ? $book->authors->pluck('id')->all() : [];
 @endphp
 
 <div class="flex flex-wrap -mx-3">
@@ -14,17 +11,11 @@
   <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.input name="isbn" label="ISBN" :value="$book->isbn" />
   </div>
-  <div class="w-full max-w-full px-3 md:w-6/12">
+  <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.input name="slug" label="Slug" :value="$book->slug" help="Kosongkan untuk dibuat otomatis dari judul." />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-6/12">
-    <x-form.select name="authors" label="Penulis" :options="$authorOptions" :selected="$selectedAuthors" multiple searchable placeholder="Pilih penulis..." />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.select name="category_id" label="Kategori" :options="$categoryOptions" :selected="$book->category_id" required searchable />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-4/12">
-    <x-form.select name="publisher_id" label="Penerbit" :options="$publisherOptions" :selected="$book->publisher_id" required searchable />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.select name="rack_id" label="Rak" :options="$rackOptions" :selected="$book->rack_id" searchable placeholder="Tanpa rak" />

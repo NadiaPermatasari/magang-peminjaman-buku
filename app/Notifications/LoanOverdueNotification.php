@@ -36,7 +36,7 @@ class LoanOverdueNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Peminjaman Terlambat — '.$this->loan->code)
             ->line("Peminjaman {$this->loan->code} telah terlambat {$this->lateDays} hari.")
-            ->line('Denda keterlambatan akan terus bertambah setiap hari sampai buku dikembalikan.')
+            ->line('Mohon segera kembalikan buku, atau ajukan perpanjangan dari halaman detail peminjaman.')
             ->action('Lihat Detail', route('loans.show', $this->loan));
     }
 }

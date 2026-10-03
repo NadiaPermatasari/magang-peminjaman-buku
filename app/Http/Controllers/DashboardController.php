@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\FineStatus;
+use App\Enums\ExtensionStatus;
 use App\Enums\LoanStatus;
 use App\Models\ActivityLog;
 use App\Models\Book;
 use App\Models\BookCopy;
-use App\Models\Fine;
 use App\Models\Loan;
+use App\Models\LoanExtension;
 use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +61,8 @@ class DashboardController extends Controller
             'dueSoonCount' => $member->loans()->where('status', LoanStatus::BORROWED)
                 ->whereBetween('due_at', [now(), now()->addDays(3)])->count(),
             'overdueCount' => $member->loans()->where('status', LoanStatus::OVERDUE)->count(),
-            'unpaidFineTotal' => $member->fines()->where('status', FineStatus::UNPAID)->sum('amount'),
+            'pendingExtensionCount' => LoanExtension::where('status', ExtensionStatus::PENDING)
+                ->whereHas('loan', fn ($q) => $q->where('member_id', $member->id))->count(),
             'activeLoans' => $member->loans()->whereIn('status', $activeStatuses)
                 ->with('items.book')->latest()->take(5)->get(),
             'recentHistory' => $member->loans()->whereNotIn('status', $activeStatuses)
@@ -81,7 +82,7 @@ class DashboardController extends Controller
             'overdueCount' => Loan::where('status', LoanStatus::OVERDUE)->count(),
             'returnedTodayCount' => Loan::where('status', LoanStatus::RETURNED)
                 ->where('returned_at', '>=', $today)->count(),
-            'unpaidFineCount' => Fine::where('status', FineStatus::UNPAID)->count(),
+            'pendingExtensionCount' => LoanExtension::where('status', ExtensionStatus::PENDING)->count(),
         ];
     }
 
@@ -113,7 +114,7 @@ class DashboardController extends Controller
             'overdueLoans' => Loan::where('status', LoanStatus::OVERDUE)->count(),
             'returnedThisMonth' => Loan::where('status', LoanStatus::RETURNED)
                 ->where('returned_at', '>=', now()->startOfMonth())->count(),
-            'unpaidFineTotal' => Fine::where('status', FineStatus::UNPAID)->sum('amount'),
+            'pendingExtensionCount' => LoanExtension::where('status', ExtensionStatus::PENDING)->count(),
             'popularCategories' => $popularCategories,
             'popularBooks' => $popularBooks,
         ];

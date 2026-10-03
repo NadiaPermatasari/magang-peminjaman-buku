@@ -29,7 +29,6 @@ class UpdateBookRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:270', 'alpha_dash', Rule::unique('books', 'slug')->ignore($book->id)],
             'category_id' => ['required', Rule::exists('categories', 'id')],
-            'publisher_id' => ['required', Rule::exists('publishers', 'id')],
             'rack_id' => ['nullable', Rule::exists('racks', 'id')],
             'publication_year' => ['nullable', 'integer', 'min:1000', 'max:'.(date('Y') + 1)],
             'edition' => ['nullable', 'string', 'max:50'],
@@ -38,8 +37,6 @@ class UpdateBookRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:5000'],
             'is_active' => ['nullable', 'boolean'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'authors' => ['nullable', 'array'],
-            'authors.*' => [Rule::exists('authors', 'id')],
         ];
     }
 }

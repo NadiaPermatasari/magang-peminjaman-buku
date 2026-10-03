@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * Append-only audit logger (spec §24).
  *
  *   Activity::log('LOAN_APPROVED', "Approved loan {$loan->code}", $loan);
- *   Activity::log('FINE_WAIVED', "Waived fine", $fine, values: ['before' => [...], 'after' => [...]]);
+ *   Activity::log('LOAN_EXTENSION_APPROVED', "Extended loan", $extension, values: ['before' => [...], 'after' => [...]]);
  *
  * Never pass password/OTP/2FA secret/recovery code/token values in
  * $description or $values — those must never reach the audit log.

@@ -3,18 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\MemberStatus;
+use App\Http\Requests\MemberAccountRequest;
 use App\Http\Requests\StoreMemberRequest;
 use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Member;
 use App\Models\User;
 use App\Support\Activity;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 
 class MemberController extends Controller
 {
@@ -28,9 +26,11 @@ class MemberController extends Controller
         $members = Member::query()
             ->with('user')
             ->when($search !== '', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('member_number', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
+                        ->orWhere('member_number', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
             })
             ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
@@ -60,20 +60,23 @@ class MemberController extends Controller
         }
 
         $member = DB::transaction(function () use ($request) {
-            $member = new Member($request->safe()->except(['identity_number', 'create_login']));
+            $member = new Member($request->safe()->except(['identity_number', 'create_login', 'password']));
             $member->member_number = $this->nextMemberNumber();
             $member->setIdentityNumber($request->input('identity_number'));
 
             if ($request->boolean('create_login')) {
+                // Kata sandi diatur petugas dan email langsung ditandai
+                // terverifikasi, supaya anggota bisa login tanpa menunggu
+                // email verifikasi/reset (server email opsional di sini).
                 $user = User::create([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
-                    'password' => Hash::make(Str::random(40)),
+                    'password' => Hash::make($request->input('password')),
                 ]);
+                $user->forceFill(['email_verified_at' => now()])->save();
                 $user->assignRole('anggota');
+
                 $member->user_id = $user->id;
-                event(new Registered($user));
-                Password::sendResetLink(['email' => $user->email]);
             }
 
             $member->save();
@@ -83,7 +86,14 @@ class MemberController extends Controller
 
         Activity::log('MEMBER_CREATED', "Created member {$member->name} ({$member->member_number})", $member);
 
-        return redirect()->route('members.index')->with('success', "Anggota {$member->name} berhasil ditambahkan.");
+        $message = "Anggota {$member->name} berhasil ditambahkan.";
+
+        if ($member->user_id) {
+            Activity::log('MEMBER_ACCOUNT_CREATED', "Login account created for member {$member->member_number}", $member);
+            $message .= " Akun login dibuat untuk {$member->email} — serahkan kata sandinya ke anggota.";
+        }
+
+        return redirect()->route('members.index')->with('success', $message);
     }
 
     public function edit(Member $member)
@@ -91,7 +101,7 @@ class MemberController extends Controller
         $this->authorize('update', $member);
 
         return view('members.edit', [
-            'member' => $member,
+            'member' => $member->load('user'),
             'statuses' => MemberStatus::cases(),
         ]);
     }
@@ -112,6 +122,40 @@ class MemberController extends Controller
         Activity::log('MEMBER_UPDATED', "Updated member {$member->name} ({$member->member_number})", $member);
 
         return redirect()->route('members.index')->with('success', "Anggota {$member->name} berhasil diperbarui.");
+    }
+
+    /**
+     * Membuat akun login untuk anggota yang belum punya, atau mengatur ulang
+     * kata sandinya. Kata sandi tidak pernah masuk ke audit log (spec §24).
+     */
+    public function account(MemberAccountRequest $request, Member $member): RedirectResponse
+    {
+        $member->loadMissing('user');
+
+        if ($member->user) {
+            $member->user->forceFill(['password' => Hash::make($request->input('password'))])->save();
+
+            Activity::log('MEMBER_PASSWORD_RESET', "Password reset for member {$member->member_number}", $member);
+
+            return back()->with('success', "Kata sandi akun {$member->user->email} berhasil diperbarui.");
+        }
+
+        DB::transaction(function () use ($request, $member) {
+            $user = User::create([
+                'name' => $member->name,
+                'email' => $member->email,
+                'password' => Hash::make($request->input('password')),
+            ]);
+            $user->forceFill(['email_verified_at' => now()])->save();
+            $user->assignRole('anggota');
+
+            $member->user_id = $user->id;
+            $member->save();
+        });
+
+        Activity::log('MEMBER_ACCOUNT_CREATED', "Login account created for member {$member->member_number}", $member);
+
+        return back()->with('success', "Akun login untuk {$member->email} berhasil dibuat — serahkan kata sandinya ke anggota.");
     }
 
     public function destroy(Member $member): RedirectResponse

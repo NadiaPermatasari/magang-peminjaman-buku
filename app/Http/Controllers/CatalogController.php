@@ -21,7 +21,7 @@ class CatalogController extends Controller
 
         $books = Book::query()
             ->where('is_active', true)
-            ->with(['category', 'authors'])
+            ->with('category')
             ->withCount(['copies as available_count' => fn ($q) => $q->where('status', BookCopyStatus::AVAILABLE)])
             ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%")->orWhere('isbn', 'like', "%{$search}%"))
             ->when($categoryId, fn ($q) => $q->where('category_id', $categoryId))
@@ -39,7 +39,7 @@ class CatalogController extends Controller
     {
         abort_unless($book->is_active, 404);
 
-        $book->load(['category', 'publisher', 'rack', 'authors']);
+        $book->load(['category', 'rack']);
 
         return view('catalog.show', [
             'book' => $book,

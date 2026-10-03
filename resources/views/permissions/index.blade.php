@@ -6,8 +6,8 @@
 @php
   $groupLabels = [
     'dashboard' => 'Dashboard', 'books' => 'Buku', 'book-copies' => 'Eksemplar Buku',
-    'categories' => 'Kategori', 'authors' => 'Penulis', 'publishers' => 'Penerbit', 'racks' => 'Rak',
-    'members' => 'Anggota', 'loans' => 'Peminjaman', 'returns' => 'Pengembalian', 'fines' => 'Denda',
+    'categories' => 'Kategori', 'racks' => 'Rak',
+    'members' => 'Anggota', 'loans' => 'Peminjaman', 'loan-extensions' => 'Perpanjangan', 'returns' => 'Pengembalian',
     'reports' => 'Laporan', 'users' => 'User', 'roles' => 'Role', 'permissions' => 'Permission',
     'settings' => 'Pengaturan', 'audit-logs' => 'Audit Log', 'security-dashboard' => 'Security Dashboard',
   ];

@@ -47,11 +47,6 @@ class Member extends Model
         return $this->hasMany(Loan::class);
     }
 
-    public function fines(): HasMany
-    {
-        return $this->hasMany(Fine::class);
-    }
-
     public function setIdentityNumber(?string $value): void
     {
         $this->identity_number = $value;

@@ -31,7 +31,6 @@
           <tr>
             <th class="{{ $th }}">Buku</th>
             <th class="{{ $th }}">Kategori</th>
-            <th class="{{ $th }}">Penerbit</th>
             <th class="{{ $th }} text-center">Eksemplar</th>
             <th class="{{ $th }} text-center">Status</th>
             <th class="{{ $th }} text-center">Aksi</th>
@@ -45,12 +44,11 @@
                   <img src="{{ $book->cover_url ?? asset('assets/img/theme/bootstrap.jpg') }}" class="object-cover w-9 h-12 mr-3 rounded-md" alt="" />
                   <div>
                     <h6 class="mb-0 text-sm leading-normal dark:text-white">{{ $book->title }}</h6>
-                    <p class="mb-0 text-xs leading-tight text-slate-400">{{ $book->authors->pluck('name')->join(', ') ?: '—' }}</p>
+                    <p class="mb-0 text-xs leading-tight text-slate-400">{{ $book->isbn ?: '—' }}</p>
                   </div>
                 </div>
               </td>
               <td class="{{ $td }} text-xs text-slate-400">{{ $book->category->name }}</td>
-              <td class="{{ $td }} text-xs text-slate-400">{{ $book->publisher->name }}</td>
               <td class="{{ $td }} text-center text-sm">{{ $book->copies_count }}</td>
               <td class="{{ $td }} text-center">
                 @if ($book->is_active)
@@ -72,7 +70,7 @@
               </td>
             </tr>
           @empty
-            <tr><td colspan="6" class="p-6 text-sm text-center dark:text-white/80">Belum ada buku.</td></tr>
+            <tr><td colspan="5" class="p-6 text-sm text-center dark:text-white/80">Belum ada buku.</td></tr>
           @endforelse
         </tbody>
       </table>

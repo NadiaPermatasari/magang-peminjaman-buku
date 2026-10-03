@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\FineStatus;
 use App\Enums\LoanStatus;
 use App\Models\BookCopy;
-use App\Models\Fine;
 use App\Models\Loan;
 use App\Models\Member;
 use App\Support\CsvExport;
@@ -86,28 +84,6 @@ class ReportController extends Controller
         }
 
         return view('reports.overdue', ['loans' => $query->paginate(20)->withQueryString()]);
-    }
-
-    public function fines(Request $request)
-    {
-        abort_unless($request->user()->can('reports.view'), 403);
-
-        $query = Fine::with(['member', 'loanItem.book'])
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
-            ->when($request->filled('from'), fn ($q) => $q->whereDate('calculated_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('calculated_at', '<=', $request->date('to')))
-            ->latest('calculated_at');
-
-        if ($request->query('export') === 'csv' && $request->user()->can('reports.export')) {
-            return CsvExport::stream('laporan-denda.csv', ['Anggota', 'Buku', 'Terlambat (hari)', 'Jumlah', 'Status', 'Dihitung'], $query->get()->map(
-                fn (Fine $fine) => [$fine->member->name, $fine->loanItem->book->title, $fine->late_days, $fine->amount, $fine->status->label(), $fine->calculated_at->format('Y-m-d H:i')]
-            ));
-        }
-
-        return view('reports.fines', [
-            'fines' => $query->paginate(20)->withQueryString(),
-            'statuses' => FineStatus::cases(),
-        ]);
     }
 
     public function statistics(Request $request)

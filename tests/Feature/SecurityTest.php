@@ -6,7 +6,6 @@ use App\Actions\Loans\CreateLoan;
 use App\Enums\MemberStatus;
 use App\Exceptions\LoanException;
 use App\Models\Category;
-use App\Models\Publisher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -29,7 +28,7 @@ class SecurityTest extends TestCase
      */
     public function test_state_changing_routes_are_protected_by_the_web_csrf_middleware(): void
     {
-        $routes = collect(['categories.store', 'loans.store', 'users.store', 'settings.update', 'fines.waive']);
+        $routes = collect(['categories.store', 'loans.store', 'users.store', 'settings.update', 'returns.store', 'loan-extensions.approve']);
 
         $routes->each(function (string $name) {
             $route = Route::getRoutes()->getByName($name);
@@ -72,14 +71,12 @@ class SecurityTest extends TestCase
         $this->seedRoles();
         $admin = $this->makeUser('admin-perpustakaan');
         $category = Category::factory()->create();
-        $publisher = Publisher::factory()->create();
 
         $maliciousFile = UploadedFile::fake()->createWithContent('shell.php', '<?php echo "pwned"; ?>');
 
         $response = $this->actingAs($admin)->post('/books', [
             'title' => 'Judul Uji',
             'category_id' => $category->id,
-            'publisher_id' => $publisher->id,
             'cover' => $maliciousFile,
         ]);
 

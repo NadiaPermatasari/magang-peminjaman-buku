@@ -3,7 +3,6 @@
 namespace App\Actions\Loans;
 
 use App\Enums\BookCopyStatus;
-use App\Enums\FineStatus;
 use App\Enums\LoanStatus;
 use App\Exceptions\LoanException;
 use App\Models\Book;
@@ -106,14 +105,6 @@ class CreateLoan
 
             if ($hasOverdue) {
                 throw new LoanException('Anggota memiliki peminjaman yang terlambat dan belum dikembalikan.');
-            }
-        }
-
-        if (setting('block_if_unpaid_fine', true)) {
-            $hasUnpaidFine = $member->fines()->where('status', FineStatus::UNPAID)->exists();
-
-            if ($hasUnpaidFine) {
-                throw new LoanException('Anggota memiliki denda yang belum diselesaikan.');
             }
         }
     }

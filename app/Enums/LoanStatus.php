@@ -53,7 +53,9 @@ enum LoanStatus: string
             self::PENDING => [self::APPROVED, self::REJECTED, self::CANCELLED],
             self::APPROVED => [self::BORROWED, self::EXPIRED, self::CANCELLED],
             self::BORROWED => [self::RETURNED, self::OVERDUE],
-            self::OVERDUE => [self::RETURNED],
+            // OVERDUE -> BORROWED hanya terjadi lewat perpanjangan yang
+            // disetujui (ApproveLoanExtension menggeser jatuh tempo).
+            self::OVERDUE => [self::RETURNED, self::BORROWED],
             self::REJECTED, self::RETURNED, self::EXPIRED, self::CANCELLED => [],
         };
     }

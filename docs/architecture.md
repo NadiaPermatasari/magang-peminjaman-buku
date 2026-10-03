@@ -5,13 +5,14 @@
 ```
 app/
 ├── Actions/            Business logic (spec §48) — controller tetap tipis
-│   ├── Loans/           CreateLoan, ApproveLoan, RejectLoan, HandoverLoan,
-│   │                    ReturnLoan, ExpireLoan, CancelLoan
-│   └── Fines/            CalculateFine, MarkFinePaid, WaiveFine
+│   └── Loans/           CreateLoan, ApproveLoan, RejectLoan, HandoverLoan,
+│                        ReturnLoan, ExpireLoan, CancelLoan,
+│                        RequestLoanExtension, ApproveLoanExtension,
+│                        RejectLoanExtension
 ├── Console/Commands/    loans:mark-overdue, loans:expire-approved,
 │                        loans:process-reminders (scheduler, spec §20)
-├── Enums/               LoanStatus, BookCopyStatus, BookCondition,
-│                        MemberStatus, FineStatus — transisi status
+├── Enums/               LoanStatus, ExtensionStatus, BookCopyStatus,
+│                        BookCondition, MemberStatus — transisi status
 │                        legal didefinisikan di dalam enum itu sendiri
 ├── Exceptions/          LoanException — pelanggaran business rule,
 │                        ditangkap controller dan ditampilkan sebagai

@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rules\Password;
 
 class StoreMemberRequest extends FormRequest
 {
@@ -28,18 +29,32 @@ class StoreMemberRequest extends FormRequest
             'expired_at' => ['nullable', 'date', 'after_or_equal:joined_at'],
             'notes' => ['nullable', 'string', 'max:500'],
             'create_login' => ['nullable', 'boolean'],
+            // Password diisi langsung oleh petugas: server email belum tentu
+            // tersedia, jadi anggota harus bisa langsung login dengan
+            // kredensial yang diserahkan petugas.
+            'password' => [$this->boolean('create_login') ? 'required' : 'nullable', 'string', Password::default(), 'confirmed'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'create_login' => 'akun login',
+            'password' => 'kata sandi',
         ];
     }
 
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            if ($this->boolean('create_login')) {
-                if (! $this->filled('email')) {
-                    $validator->errors()->add('email', 'Email wajib diisi untuk membuat akun login.');
-                } elseif (User::where('email', $this->input('email'))->exists()) {
-                    $validator->errors()->add('email', 'Email ini sudah digunakan oleh akun lain.');
-                }
+            if (! $this->boolean('create_login')) {
+                return;
+            }
+
+            if (! $this->filled('email')) {
+                $validator->errors()->add('email', 'Email wajib diisi untuk membuat akun login.');
+            } elseif (User::withTrashed()->where('email', $this->input('email'))->exists()) {
+                $validator->errors()->add('email', 'Email ini sudah digunakan oleh akun lain.');
             }
         });
     }

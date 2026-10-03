@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
-            $table->foreignId('publisher_id')->constrained()->restrictOnDelete();
             $table->unsignedSmallInteger('publication_year')->nullable();
             $table->string('edition')->nullable();
             $table->string('language', 40)->nullable();
@@ -31,17 +30,10 @@ return new class extends Migration
 
             $table->index('title');
         });
-
-        Schema::create('author_book', function (Blueprint $table) {
-            $table->foreignId('book_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('author_id')->constrained()->cascadeOnDelete();
-            $table->primary(['book_id', 'author_id']);
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('author_book');
         Schema::dropIfExists('books');
     }
 };

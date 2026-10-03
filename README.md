@@ -1,6 +1,6 @@
 # Sistem Informasi Peminjaman Buku
 
-Sistem informasi perpustakaan berbasis Laravel 12 untuk mengelola katalog buku, eksemplar fisik, keanggotaan, alur peminjaman/pengembalian, denda keterlambatan, notifikasi, laporan, dan keamanan aplikasi (RBAC, 2FA, enkripsi data sensitif, audit trail).
+Sistem informasi perpustakaan berbasis Laravel 12 untuk mengelola katalog buku, eksemplar fisik, keanggotaan, alur peminjaman/pengembalian (dengan bukti foto), perpanjangan peminjaman, notifikasi, laporan, dan keamanan aplikasi (RBAC, 2FA, enkripsi data sensitif, audit trail).
 
 Tampilan menggunakan [Argon Dashboard Tailwind](https://www.creative-tim.com/product/argon-dashboard-tailwind) (Creative Tim), diintegrasikan dengan Laravel Fortify untuk autentikasi.
 
@@ -62,8 +62,8 @@ php artisan db:seed
 
 1. `RolePermissionSeeder` — membuat seluruh permission (lihat [docs/permissions.md](docs/permissions.md)) dan 5 role default (`super-admin`, `admin-perpustakaan`, `petugas`, `anggota`, `pimpinan`). Idempotent, aman dijalankan berulang.
 2. `SuperAdminSeeder` — membuat akun super-admin awal dari `SUPER_ADMIN_EMAIL`/`SUPER_ADMIN_PASSWORD`.
-3. `ApplicationSettingSeeder` — mengisi nilai default untuk seluruh pengaturan aplikasi (identitas, branding, peminjaman, denda, notifikasi).
-4. `DemoMasterDataSeeder` — data contoh (kategori, penulis, penerbit, rak, buku + eksemplar, anggota). **Otomatis dilewati saat `APP_ENV=production`.**
+3. `ApplicationSettingSeeder` — mengisi nilai default untuk seluruh pengaturan aplikasi (identitas, branding, peminjaman, notifikasi).
+4. `DemoMasterDataSeeder` — data contoh (kategori, rak, buku + eksemplar, anggota beserta akun loginnya). **Otomatis dilewati saat `APP_ENV=production`.** Password anggota demo diambil dari `DEMO_MEMBER_PASSWORD` (default `Anggota123!`) dan ditampilkan di output seeder.
 
 Untuk reset penuh saat development:
 
@@ -165,7 +165,7 @@ Selain logo/favicon/background, Super Admin dapat mengganti **warna utama (prima
 php artisan test
 ```
 
-Test menggunakan SQLite in-memory (dikonfigurasi di `phpunit.xml`) — database MySQL development/production **tidak pernah tersentuh** oleh test suite. Cakupan: autentikasi, RBAC, IDOR, alur peminjaman penuh (termasuk cegah alokasi ganda eksemplar), denda, pengaturan, dan kontrol keamanan (CSRF, mass assignment, validasi upload, anggota nonaktif diblokir).
+Test menggunakan SQLite in-memory (dikonfigurasi di `phpunit.xml`) — database MySQL development/production **tidak pernah tersentuh** oleh test suite. Cakupan: autentikasi, RBAC, IDOR, alur peminjaman penuh (termasuk cegah alokasi ganda eksemplar), perpanjangan peminjaman, bukti foto serah terima/pengembalian, pembuatan akun login anggota, render seluruh halaman, pengaturan, dan kontrol keamanan (CSRF, mass assignment, validasi upload, anggota nonaktif diblokir).
 
 ## Backup
 
@@ -213,7 +213,8 @@ Ringkasan kontrol keamanan yang diimplementasikan ada di [docs/security.md](docs
 
 ## Dokumentasi Lanjutan
 
+- [docs/DOKUMENTASI_APLIKASI.md](docs/DOKUMENTASI_APLIKASI.md) — dokumentasi lengkap satu-file: apa aplikasi ini, fitur, struktur kode, keamanan siber, dan enkripsi data
 - [docs/architecture.md](docs/architecture.md) — struktur aplikasi, domain model, alasan keputusan desain
 - [docs/security.md](docs/security.md) — kontrol keamanan detail per OWASP ASVS Level 2
 - [docs/permissions.md](docs/permissions.md) — daftar permission dan pemetaan role
-- [docs/loan-flow.md](docs/loan-flow.md) — diagram dan penjelasan alur peminjaman-pengembalian-denda
+- [docs/loan-flow.md](docs/loan-flow.md) — diagram dan penjelasan alur peminjaman-pengembalian-perpanjangan

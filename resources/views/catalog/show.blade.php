@@ -17,7 +17,7 @@
         </x-slot:actions>
 
         <h4 class="mb-1 dark:text-white">{{ $book->title }}</h4>
-        <p class="mb-4 text-sm text-slate-400">{{ $book->authors->pluck('name')->join(', ') ?: 'Tanpa penulis' }}</p>
+        <p class="mb-4 text-sm text-slate-400">{{ $book->category?->name ?: 'Tanpa kategori' }}</p>
 
         <span class="px-2 py-1 text-xs font-bold uppercase rounded-md {{ $availableCopies > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600' }}">
           {{ $availableCopies > 0 ? $availableCopies.' eksemplar tersedia' : 'Tidak ada eksemplar tersedia' }}
@@ -27,7 +27,6 @@
 
         <div class="flex flex-wrap -mx-3 mb-4 text-sm">
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Kategori</span><br><span class="dark:text-white">{{ $book->category->name }}</span></div>
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Penerbit</span><br><span class="dark:text-white">{{ $book->publisher->name }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">ISBN</span><br><span class="dark:text-white">{{ $book->isbn ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Tahun Terbit</span><br><span class="dark:text-white">{{ $book->publication_year ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Edisi</span><br><span class="dark:text-white">{{ $book->edition ?: '—' }}</span></div>

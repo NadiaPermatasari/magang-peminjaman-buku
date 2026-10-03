@@ -15,6 +15,17 @@ class HandoverLoanRequest extends FormRequest
     {
         return [
             'barcode' => ['required', 'string', 'max:60'],
+            // Bukti foto serah terima. MIME dibaca dari isi file, bukan dari
+            // ekstensi yang dikirim klien (spec §22).
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'photo' => 'bukti foto',
+            'barcode' => 'eksemplar',
         ];
     }
 }

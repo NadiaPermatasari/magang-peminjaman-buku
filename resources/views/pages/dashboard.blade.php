@@ -49,11 +49,11 @@
           </div>
         </div>
       @endforeach
-      @if ($memberWidgets['unpaidFineTotal'] > 0)
+      @if ($memberWidgets['pendingExtensionCount'] > 0)
         <div class="w-full px-3">
-          <div class="p-3 text-sm text-white rounded-lg bg-gradient-to-tl from-red-600 to-orange-600">
-            <i class="mr-1 fas fa-exclamation-circle"></i> Anda memiliki denda belum diselesaikan sebesar <strong>Rp{{ number_format($memberWidgets['unpaidFineTotal'], 0, ',', '.') }}</strong>.
-            <a href="{{ route('fines.index') }}" class="font-bold underline">Lihat denda</a>
+          <div class="p-3 text-sm text-white rounded-lg bg-gradient-to-tl from-orange-500 to-yellow-500">
+            <i class="mr-1 fas fa-hourglass-half"></i> Anda memiliki <strong>{{ $memberWidgets['pendingExtensionCount'] }}</strong> pengajuan perpanjangan yang menunggu persetujuan petugas.
+            <a href="{{ route('loan-extensions.index') }}" class="font-bold underline">Lihat pengajuan</a>
           </div>
         </div>
       @endif
@@ -68,7 +68,7 @@
         ['label' => 'Jatuh Tempo Hari Ini', 'value' => $staffWidgets['dueTodayCount'], 'icon' => 'ni ni-time-alarm', 'gradient' => 'from-blue-500 to-violet-500'],
         ['label' => 'Terlambat', 'value' => $staffWidgets['overdueCount'], 'icon' => 'ni ni-fat-remove', 'gradient' => 'from-red-600 to-orange-600'],
         ['label' => 'Dikembalikan Hari Ini', 'value' => $staffWidgets['returnedTodayCount'], 'icon' => 'ni ni-check-bold', 'gradient' => 'from-emerald-500 to-teal-400'],
-        ['label' => 'Denda Belum Lunas', 'value' => $staffWidgets['unpaidFineCount'], 'icon' => 'ni ni-money-coins', 'gradient' => 'from-slate-700 to-slate-500'],
+        ['label' => 'Perpanjangan Menunggu', 'value' => $staffWidgets['pendingExtensionCount'], 'icon' => 'ni ni-calendar-grid-58', 'gradient' => 'from-slate-700 to-slate-500'],
       ] as $card)
         <div class="w-full max-w-full px-3 mb-3 sm:w-1/2 xl:w-1/3">
           <div class="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
@@ -99,7 +99,7 @@
         ['label' => 'Pengajuan Pending', 'value' => $adminWidgets['pendingLoans'], 'icon' => 'ni ni-watch-time', 'gradient' => 'from-orange-500 to-yellow-500'],
         ['label' => 'Terlambat', 'value' => $adminWidgets['overdueLoans'], 'icon' => 'ni ni-fat-remove', 'gradient' => 'from-red-600 to-orange-600'],
         ['label' => 'Dikembalikan Bulan Ini', 'value' => $adminWidgets['returnedThisMonth'], 'icon' => 'ni ni-check-bold', 'gradient' => 'from-emerald-500 to-teal-400'],
-        ['label' => 'Total Denda Belum Lunas', 'value' => 'Rp'.number_format($adminWidgets['unpaidFineTotal'], 0, ',', '.'), 'icon' => 'ni ni-money-coins', 'gradient' => 'from-slate-700 to-slate-500'],
+        ['label' => 'Perpanjangan Menunggu', 'value' => $adminWidgets['pendingExtensionCount'], 'icon' => 'ni ni-calendar-grid-58', 'gradient' => 'from-slate-700 to-slate-500'],
       ] as $card)
         <div class="w-full max-w-full px-3 mb-3 sm:w-1/2 xl:w-1/4">
           <div class="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">

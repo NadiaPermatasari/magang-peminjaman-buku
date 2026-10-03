@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ExtensionStatus;
 use App\Enums\LoanStatus;
 use App\Support\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,29 @@ class Loan extends Model
     public function items(): HasMany
     {
         return $this->hasMany(LoanItem::class);
+    }
+
+    public function extensions(): HasMany
+    {
+        return $this->hasMany(LoanExtension::class)->latest('requested_at');
+    }
+
+    /** Pengajuan perpanjangan yang masih menunggu keputusan admin, jika ada. */
+    public function pendingExtension(): ?LoanExtension
+    {
+        return $this->extensions()->where('status', ExtensionStatus::PENDING)->first();
+    }
+
+    /** Berapa kali perpanjangan peminjaman ini sudah disetujui (batas: setting max_renewals). */
+    public function approvedExtensionCount(): int
+    {
+        return $this->extensions()->where('status', ExtensionStatus::APPROVED)->count();
+    }
+
+    /** Peminjaman yang sudah di tangan anggota — satu-satunya yang boleh diperpanjang. */
+    public function isActive(): bool
+    {
+        return in_array($this->status, [LoanStatus::BORROWED, LoanStatus::OVERDUE], true);
     }
 
     public function approvedBy(): BelongsTo

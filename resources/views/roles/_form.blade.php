@@ -2,8 +2,8 @@
   $isEdit = $role->exists;
   $groupLabels = [
     'dashboard' => 'Dashboard', 'books' => 'Buku', 'book-copies' => 'Eksemplar Buku',
-    'categories' => 'Kategori', 'authors' => 'Penulis', 'publishers' => 'Penerbit', 'racks' => 'Rak',
-    'members' => 'Anggota', 'loans' => 'Peminjaman', 'returns' => 'Pengembalian', 'fines' => 'Denda',
+    'categories' => 'Kategori', 'racks' => 'Rak',
+    'members' => 'Anggota', 'loans' => 'Peminjaman', 'loan-extensions' => 'Perpanjangan', 'returns' => 'Pengembalian',
     'reports' => 'Laporan', 'users' => 'User', 'roles' => 'Role', 'permissions' => 'Permission',
     'settings' => 'Pengaturan', 'audit-logs' => 'Audit Log', 'security-dashboard' => 'Security Dashboard',
   ];
@@ -11,8 +11,7 @@
     'view' => 'Lihat', 'view-own' => 'Lihat milik sendiri', 'view-all' => 'Lihat semua',
     'create' => 'Tambah', 'update' => 'Ubah', 'delete' => 'Hapus', 'disable' => 'Nonaktifkan',
     'approve' => 'Setujui', 'reject' => 'Tolak', 'handover' => 'Serah terima', 'cancel' => 'Batalkan',
-    'process' => 'Proses', 'mark-paid' => 'Tandai lunas', 'waive' => 'Bebaskan', 'export' => 'Export',
-    'manage' => 'Kelola',
+    'process' => 'Proses', 'export' => 'Export', 'manage' => 'Kelola',
   ];
 @endphp
 
