@@ -33,7 +33,11 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Disk privat ini tidak dipakai untuk URL apa pun. Route bawaan
+            // Laravel untuk disk ber-`serve` memakai URI /storage/{path} —
+            // kalau dibiarkan aktif, route itu merebut /storage milik disk
+            // publik dan menjawab 403 (butuh signature) untuk bukti foto.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -41,7 +45,15 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            // URL relatif (bukan APP_URL) supaya bukti foto, sampul buku dan
+            // avatar tetap terbuka di host/port mana pun aplikasi dijalankan —
+            // APP_URL yang tidak sinkron (mis. localhost vs 127.0.0.1:8000)
+            // sebelumnya membuat link bukti foto 404.
+            'url' => '/storage',
+            // Fallback lewat Laravel bila berkas tidak terlayani langsung
+            // dari symlink public/storage (mis. PHP built-in server yang
+            // belum melihat berkas yang baru diunggah).
+            'serve' => true,
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

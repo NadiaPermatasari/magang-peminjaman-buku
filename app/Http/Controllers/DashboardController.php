@@ -5,18 +5,21 @@ namespace App\Http\Controllers;
 use App\Enums\ExtensionStatus;
 use App\Enums\LoanStatus;
 use App\Models\ActivityLog;
-use App\Models\Book;
-use App\Models\BookCopy;
 use App\Models\Loan;
 use App\Models\LoanExtension;
 use App\Models\Member;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Role-specific widgets (spec §42 anggota, §43 petugas, §44 super-admin).
  * Every query here is scoped/aggregated — no per-row authorization is
  * needed since nothing renders another member's individual records.
+ *
+ * Kartu petugas/admin disatukan dalam satu daftar (tidak lagi dipisah
+ * staff/admin) supaya metrik yang sama — mis. perpanjangan menunggu —
+ * hanya muncul sekali untuk super-admin yang memegang kedua izin.
  */
 class DashboardController extends Controller
 {
@@ -31,21 +34,12 @@ class DashboardController extends Controller
                 : $user->activities()->take(8)->get(),
             'member' => null,
             'memberWidgets' => null,
-            'staffWidgets' => null,
-            'adminWidgets' => null,
+            'staffCards' => $this->staffCards($user),
         ];
 
         if ($user->can('loans.view-own') && ! $user->can('loans.view-all')) {
             $data['member'] = $user->member;
             $data['memberWidgets'] = $data['member'] ? $this->memberWidgets($data['member']) : null;
-        }
-
-        if ($user->can('loans.approve') || $user->can('returns.process')) {
-            $data['staffWidgets'] = $this->staffWidgets();
-        }
-
-        if ($user->can('reports.view') && $user->can('users.view')) {
-            $data['adminWidgets'] = $this->adminWidgets();
         }
 
         return view('pages.dashboard', $data);
@@ -70,53 +64,111 @@ class DashboardController extends Controller
         ];
     }
 
-    private function staffWidgets(): array
+    /**
+     * Kartu ringkasan petugas/admin. `value` sengaja berupa closure supaya
+     * query hanya dijalankan untuk kartu yang memang boleh dilihat user ini.
+     *
+     * @return list<array{label: string, value: int, icon: string, gradient: string, url: string}>
+     */
+    private function staffCards(User $user): array
     {
         $today = now()->startOfDay();
 
-        return [
-            'pendingCount' => Loan::where('status', LoanStatus::PENDING)->count(),
-            'readyCount' => Loan::where('status', LoanStatus::APPROVED)->count(),
-            'dueTodayCount' => Loan::where('status', LoanStatus::BORROWED)
-                ->whereBetween('due_at', [$today, $today->copy()->endOfDay()])->count(),
-            'overdueCount' => Loan::where('status', LoanStatus::OVERDUE)->count(),
-            'returnedTodayCount' => Loan::where('status', LoanStatus::RETURNED)
-                ->where('returned_at', '>=', $today)->count(),
-            'pendingExtensionCount' => LoanExtension::where('status', ExtensionStatus::PENDING)->count(),
+        $definitions = [
+            [
+                'permission' => 'loans.approve',
+                'route' => 'loans.pending',
+                'label' => 'Menunggu Verifikasi',
+                'icon' => 'ni ni-watch-time',
+                'gradient' => 'from-orange-500 to-yellow-500',
+                'value' => fn () => Loan::where('status', LoanStatus::PENDING)->count(),
+            ],
+            [
+                'permission' => 'loans.view-all',
+                'route' => 'loans.overdue',
+                'label' => 'Terlambat',
+                'icon' => 'ni ni-fat-remove',
+                'gradient' => 'from-red-600 to-orange-600',
+                'value' => fn () => Loan::where('status', LoanStatus::OVERDUE)->count(),
+            ],
+            [
+                'permission' => 'loans.approve',
+                'route' => 'loans.ready',
+                'label' => 'Siap Diambil',
+                'icon' => 'ni ni-box-2',
+                'gradient' => 'from-cyan-500 to-blue-500',
+                'value' => fn () => Loan::where('status', LoanStatus::APPROVED)->count(),
+            ],
+            [
+                'permission' => 'returns.process',
+                'route' => 'loans.index',
+                'params' => ['status' => LoanStatus::RETURNED->value],
+                'label' => 'Dikembalikan Hari Ini',
+                'icon' => 'ni ni-check-bold',
+                'gradient' => 'from-emerald-500 to-teal-400',
+                'value' => fn () => Loan::where('status', LoanStatus::RETURNED)
+                    ->where('returned_at', '>=', $today)->count(),
+            ],
+            [
+                'permission' => 'loans.view-all',
+                'route' => 'loans.active',
+                'label' => 'Jatuh Tempo Hari Ini',
+                'icon' => 'ni ni-time-alarm',
+                'gradient' => 'from-blue-500 to-violet-500',
+                'value' => fn () => Loan::where('status', LoanStatus::BORROWED)
+                    ->whereBetween('due_at', [$today, $today->copy()->endOfDay()])->count(),
+            ],
+            [
+                'permission' => 'loan-extensions.view',
+                'route' => 'loan-extensions.index',
+                'label' => 'Perpanjangan Menunggu',
+                'icon' => 'ni ni-calendar-grid-58',
+                'gradient' => 'from-slate-700 to-slate-500',
+                'value' => fn () => LoanExtension::where('status', ExtensionStatus::PENDING)->count(),
+            ],
+            [
+                'permission' => 'members.view',
+                'route' => 'members.index',
+                'label' => 'Total Anggota',
+                'icon' => 'ni ni-circle-08',
+                'gradient' => 'from-emerald-500 to-teal-400',
+                'value' => fn () => Member::count(),
+            ],
+            [
+                'permission' => 'loans.view-all',
+                'route' => 'loans.active',
+                'label' => 'Peminjaman Aktif',
+                'icon' => 'ni ni-cart',
+                'gradient' => 'from-orange-500 to-yellow-500',
+                'value' => fn () => Loan::whereIn('status', [LoanStatus::BORROWED, LoanStatus::OVERDUE])->count(),
+            ],
+            [
+                'permission' => 'loans.view-all',
+                'route' => 'loans.index',
+                'params' => ['status' => LoanStatus::PENDING->value],
+                'label' => 'Pengajuan Pending',
+                'icon' => 'ni ni-single-copy-04',
+                'gradient' => 'from-orange-500 to-yellow-500',
+                'value' => fn () => Loan::where('status', LoanStatus::PENDING)->count(),
+            ],
         ];
-    }
 
-    private function adminWidgets(): array
-    {
-        $popularCategories = DB::table('loan_items')
-            ->join('books', 'books.id', '=', 'loan_items.book_id')
-            ->join('categories', 'categories.id', '=', 'books.category_id')
-            ->select('categories.name', DB::raw('count(*) as total'))
-            ->groupBy('categories.name')
-            ->orderByDesc('total')
-            ->take(5)
-            ->get();
+        $cards = [];
 
-        $popularBooks = DB::table('loan_items')
-            ->join('books', 'books.id', '=', 'loan_items.book_id')
-            ->select('books.title', DB::raw('count(*) as total'))
-            ->groupBy('books.title')
-            ->orderByDesc('total')
-            ->take(5)
-            ->get();
+        foreach ($definitions as $card) {
+            if (! $user->can($card['permission']) || ! Route::has($card['route'])) {
+                continue;
+            }
 
-        return [
-            'totalTitles' => Book::count(),
-            'totalCopies' => BookCopy::count(),
-            'totalMembers' => Member::count(),
-            'activeLoans' => Loan::whereIn('status', [LoanStatus::BORROWED, LoanStatus::OVERDUE])->count(),
-            'pendingLoans' => Loan::where('status', LoanStatus::PENDING)->count(),
-            'overdueLoans' => Loan::where('status', LoanStatus::OVERDUE)->count(),
-            'returnedThisMonth' => Loan::where('status', LoanStatus::RETURNED)
-                ->where('returned_at', '>=', now()->startOfMonth())->count(),
-            'pendingExtensionCount' => LoanExtension::where('status', ExtensionStatus::PENDING)->count(),
-            'popularCategories' => $popularCategories,
-            'popularBooks' => $popularBooks,
-        ];
+            $cards[] = [
+                'label' => $card['label'],
+                'value' => ($card['value'])(),
+                'icon' => $card['icon'],
+                'gradient' => $card['gradient'],
+                'url' => route($card['route'], $card['params'] ?? []),
+            ];
+        }
+
+        return $cards;
     }
 }

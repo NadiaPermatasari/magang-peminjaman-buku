@@ -2,6 +2,7 @@
 
 @section('title', 'Masuk')
 @section('page', 'sign-in')
+@section('hide-auth-navbar', true)
 
 @section('content')
   <x-auth-card :heading="'Masuk ke '.app_name()" subheading="Gunakan akun yang diberikan oleh admin perpustakaan.">

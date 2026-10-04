@@ -8,7 +8,12 @@
 @section('body-class', 'm-0 font-sans antialiased font-normal bg-white text-start text-base leading-default text-slate-500')
 
 @section('body')
-  @include('layouts.partials.auth-navbar')
+  {{-- Halaman yang mendefinisikan section `hide-auth-navbar` tampil tanpa bar
+       atas — mis. halaman masuk, di mana tautan "Masuk" hanya menunjuk ke
+       halaman itu sendiri. --}}
+  @unless (View::hasSection('hide-auth-navbar'))
+    @include('layouts.partials.auth-navbar')
+  @endunless
 
   <main class="mt-0 transition-all duration-200 ease-in-out">
     @yield('content')
