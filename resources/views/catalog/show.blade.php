@@ -17,7 +17,7 @@
         </x-slot:actions>
 
         <h4 class="mb-1 dark:text-white">{{ $book->title }}</h4>
-        <p class="mb-4 text-sm text-slate-400">{{ $book->category?->name ?: 'Tanpa kategori' }}</p>
+        <p class="mb-4 text-sm text-slate-400">{{ $book->category?->name ?: 'Tanpa jenis hak' }}</p>
 
         <span class="px-2 py-1 text-xs font-bold uppercase rounded-md {{ $availableCopies > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600' }}">
           {{ $availableCopies > 0 ? $availableCopies.' eksemplar tersedia' : 'Tidak ada eksemplar tersedia' }}
@@ -26,8 +26,10 @@
         <hr class="h-px mx-0 my-4 bg-transparent border-0 opacity-25 bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent" />
 
         <div class="flex flex-wrap -mx-3 mb-4 text-sm">
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Kategori</span><br><span class="dark:text-white">{{ $book->category->name }}</span></div>
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">ISBN</span><br><span class="dark:text-white">{{ $book->isbn ?: '—' }}</span></div>
+          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Jenis Hak</span><br><span class="dark:text-white">{{ $book->category->name }}</span></div>
+          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">No. Hak</span><br><span class="dark:text-white">{{ $book->no_hak ?: '—' }}</span></div>
+          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">No. SU</span><br><span class="dark:text-white">{{ $book->no_su ?: '—' }}</span></div>
+          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Nama Pemilik</span><br><span class="dark:text-white">{{ $book->nama_pemilik ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Tahun Terbit</span><br><span class="dark:text-white">{{ $book->publication_year ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Edisi</span><br><span class="dark:text-white">{{ $book->edition ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Bahasa</span><br><span class="dark:text-white">{{ $book->language ?: '—' }}</span></div>

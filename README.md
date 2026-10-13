@@ -1,6 +1,6 @@
 # Sistem Informasi Peminjaman Buku
 
-Sistem informasi perpustakaan berbasis Laravel 12 untuk mengelola katalog buku, eksemplar fisik, keanggotaan, alur peminjaman/pengembalian (dengan bukti foto), perpanjangan peminjaman, notifikasi, laporan, dan keamanan aplikasi (RBAC, 2FA, enkripsi data sensitif, audit trail).
+Sistem informasi perpustakaan berbasis Laravel 12 untuk mengelola arsip berkas (No. Hak, No. SU, nama pemilik, jenis hak), eksemplar fisik, keanggotaan, alur peminjaman/pengembalian (dengan bukti foto), perpanjangan peminjaman, notifikasi, laporan, dan keamanan aplikasi (RBAC, 2FA, enkripsi data sensitif, audit trail).
 
 Tampilan menggunakan [Argon Dashboard Tailwind](https://www.creative-tim.com/product/argon-dashboard-tailwind) (Creative Tim), diintegrasikan dengan Laravel Fortify untuk autentikasi.
 
@@ -63,7 +63,7 @@ php artisan db:seed
 1. `RolePermissionSeeder` — membuat seluruh permission (lihat [docs/permissions.md](docs/permissions.md)) dan 5 role default (`super-admin`, `admin-perpustakaan`, `petugas`, `anggota`, `pimpinan`). Idempotent, aman dijalankan berulang.
 2. `SuperAdminSeeder` — membuat akun super-admin awal dari `SUPER_ADMIN_EMAIL`/`SUPER_ADMIN_PASSWORD`.
 3. `ApplicationSettingSeeder` — mengisi nilai default untuk seluruh pengaturan aplikasi (identitas, branding, peminjaman, notifikasi).
-4. `DemoMasterDataSeeder` — data contoh (kategori, rak, buku + eksemplar, anggota beserta akun loginnya). **Otomatis dilewati saat `APP_ENV=production`.** Password anggota demo diambil dari `DEMO_MEMBER_PASSWORD` (default `Anggota123!`) dan ditampilkan di output seeder.
+4. `DemoMasterDataSeeder` — data contoh (jenis hak, rak, berkas + eksemplar, anggota beserta akun loginnya). **Otomatis dilewati saat `APP_ENV=production`.** Password anggota demo diambil dari `DEMO_MEMBER_PASSWORD` (default `Anggota123!`) dan ditampilkan di output seeder.
 
 Untuk reset penuh saat development:
 
@@ -104,7 +104,7 @@ php artisan queue:work
 
 Scheduler menjalankan tiga command setiap jam (lihat `routes/console.php`), semuanya idempotent — aman dijalankan berulang tanpa mengirim notifikasi duplikat:
 
-- `loans:mark-overdue` — menandai peminjaman yang melewati jatuh tempo
+- `loans:mark-overdue` — menandai peminjaman yang melewati jatuh tempo menjadi *Terlambat*. Pengecekan yang sama juga dijalankan otomatis (maksimal sekali per menit) saat pengguna login membuka halaman (`SyncOverdueLoans`), sehingga status tetap benar walau cron belum terpasang
 - `loans:expire-approved` — membatalkan pengajuan yang disetujui tapi tidak diambil sebelum `pickup_deadline`
 - `loans:process-reminders` — mengirim reminder pengambilan/jatuh tempo/keterlambatan sesuai pengaturan Notifikasi
 
@@ -125,6 +125,10 @@ autorestart=true
 numprocs=2
 stopwaitsecs=3600
 ```
+
+## Data Berkas (Jenis Hak, No. Hak, No. SU)
+
+Form tambah/ubah buku mencatat: judul, **No. Hak**, **No. SU**, **Nama pemilik**, **Jenis Hak**, rak, deskripsi, dan sampul. Jenis Hak memakai tabel `categories` (menu *Master Data > Jenis Hak*) dan diisi migrasi dengan: Hak Milik, Hak Guna Usaha, Hak Pakai, Hak Pengelolaan, dan Lainnya. Di sidebar, grup *Transaksi* bernama **Pengajuan & Perpanjangan Peminjam**. Halaman *Peminjaman Aktif* menampilkan "Sisa N hari" atau "Terlambat N hari" di samping tanggal jatuh tempo.
 
 ## Storage & Upload
 

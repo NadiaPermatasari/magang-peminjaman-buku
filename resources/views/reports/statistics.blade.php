@@ -14,7 +14,7 @@
 
   <div class="flex flex-wrap -mx-3">
     <div class="w-full max-w-full px-3 mb-6 lg:w-4/12 lg:flex-none">
-      <x-card title="Statistik Kategori">
+      <x-card title="Statistik Jenis Hak">
         <ul class="pl-0 mb-0">
           @forelse ($categoryStats as $row)
             <li class="flex items-center justify-between py-1.5 border-b border-solid last:border-0 border-gray-100 dark:border-white/5">

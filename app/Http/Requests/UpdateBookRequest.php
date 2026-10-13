@@ -25,7 +25,9 @@ class UpdateBookRequest extends FormRequest
         $book = $this->route('book');
 
         return [
-            'isbn' => ['nullable', 'string', 'max:20', Rule::unique('books', 'isbn')->ignore($book->id)],
+            'no_hak' => ['nullable', 'string', 'max:50'],
+            'no_su' => ['nullable', 'string', 'max:50'],
+            'nama_pemilik' => ['nullable', 'string', 'max:255'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:270', 'alpha_dash', Rule::unique('books', 'slug')->ignore($book->id)],
             'category_id' => ['required', Rule::exists('categories', 'id')],

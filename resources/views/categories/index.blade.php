@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Kategori')
+@section('title', 'Jenis Hak')
 @section('page', 'categories')
 
 @php
@@ -9,13 +9,13 @@
 @endphp
 
 @section('content')
-  <x-card title="Kategori" :subtitle="$categories->total().' kategori'" :padding="false">
+  <x-card title="Jenis Hak" :subtitle="$categories->total().' jenis hak'" :padding="false">
     <x-slot:actions>
       <form method="GET" action="{{ route('categories.index') }}">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kategori..." class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20" />
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari jenis hak..." class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20" />
       </form>
       @can('create', App\Models\Category::class)
-        <x-button href="{{ route('categories.create') }}" icon="fas fa-plus">Tambah kategori</x-button>
+        <x-button href="{{ route('categories.create') }}" icon="fas fa-plus">Tambah jenis hak</x-button>
       @endcan
     </x-slot:actions>
 
@@ -40,7 +40,7 @@
                   <a href="{{ route('categories.edit', $category) }}" class="mr-3 text-xs font-semibold text-slate-400 hover:text-blue-500"><i class="mr-1 fas fa-pen"></i>Ubah</a>
                 @endcan
                 @can('delete', $category)
-                  <form method="POST" action="{{ route('categories.destroy', $category) }}" class="inline" onsubmit="return confirm('Hapus kategori {{ addslashes($category->name) }}?');">
+                  <form method="POST" action="{{ route('categories.destroy', $category) }}" class="inline" onsubmit="return confirm('Hapus jenis hak {{ addslashes($category->name) }}?');">
                     @csrf @method('DELETE')
                     <button type="submit" class="p-0 text-xs font-semibold bg-transparent border-0 cursor-pointer text-slate-400 hover:text-red-600"><i class="mr-1 fas fa-trash"></i>Hapus</button>
                   </form>
@@ -48,7 +48,7 @@
               </td>
             </tr>
           @empty
-            <tr><td colspan="4" class="p-6 text-sm text-center dark:text-white/80">Belum ada kategori.</td></tr>
+            <tr><td colspan="4" class="p-6 text-sm text-center dark:text-white/80">Belum ada jenis hak.</td></tr>
           @endforelse
         </tbody>
       </table>

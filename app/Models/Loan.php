@@ -63,6 +63,27 @@ class Loan extends Model
         return $this->extensions()->where('status', ExtensionStatus::APPROVED)->count();
     }
 
+    /**
+     * Pindahkan peminjaman BORROWED yang sudah lewat jatuh tempo ke OVERDUE.
+     * Idempoten; dipanggil scheduler (loans:mark-overdue) dan juga saat
+     * halaman dibuka, sehingga status tetap benar walau cron tidak berjalan.
+     */
+    public static function syncOverdue(): int
+    {
+        $loans = static::where('status', LoanStatus::BORROWED)
+            ->where('due_at', '<', now())
+            ->get();
+
+        foreach ($loans as $loan) {
+            $loan->items()->where('status', LoanStatus::BORROWED)->update(['status' => LoanStatus::OVERDUE]);
+            $loan->update(['status' => LoanStatus::OVERDUE]);
+
+            \App\Support\Activity::log('LOAN_OVERDUE', "Loan {$loan->code} marked overdue", $loan);
+        }
+
+        return $loans->count();
+    }
+
     /** Peminjaman yang sudah di tangan anggota — satu-satunya yang boleh diperpanjang. */
     public function isActive(): bool
     {

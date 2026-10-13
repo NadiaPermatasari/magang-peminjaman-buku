@@ -23,7 +23,7 @@ class CatalogController extends Controller
             ->where('is_active', true)
             ->with('category')
             ->withCount(['copies as available_count' => fn ($q) => $q->where('status', BookCopyStatus::AVAILABLE)])
-            ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%")->orWhere('isbn', 'like', "%{$search}%"))
+            ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%")->orWhere('no_hak', 'like', "%{$search}%")->orWhere('no_su', 'like', "%{$search}%")->orWhere('nama_pemilik', 'like', "%{$search}%"))
             ->when($categoryId, fn ($q) => $q->where('category_id', $categoryId))
             ->orderBy('title')
             ->paginate(12)

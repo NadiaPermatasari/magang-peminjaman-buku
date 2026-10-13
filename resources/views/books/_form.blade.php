@@ -9,13 +9,19 @@
     <x-form.input name="title" label="Judul buku" :value="$book->title" required />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
-    <x-form.input name="isbn" label="ISBN" :value="$book->isbn" />
+    <x-form.input name="no_hak" label="No. Hak" :value="$book->no_hak" />
+  </div>
+  <div class="w-full max-w-full px-3 md:w-4/12">
+    <x-form.input name="no_su" label="No. SU" :value="$book->no_su" />
+  </div>
+  <div class="w-full max-w-full px-3 md:w-4/12">
+    <x-form.input name="nama_pemilik" label="Nama pemilik" :value="$book->nama_pemilik" />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.input name="slug" label="Slug" :value="$book->slug" help="Kosongkan untuk dibuat otomatis dari judul." />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
-    <x-form.select name="category_id" label="Kategori" :options="$categoryOptions" :selected="$book->category_id" required searchable />
+    <x-form.select name="category_id" label="Jenis hak" :options="$categoryOptions" :selected="$book->category_id" required searchable />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.select name="rack_id" label="Rak" :options="$rackOptions" :selected="$book->rack_id" searchable placeholder="Tanpa rak" />

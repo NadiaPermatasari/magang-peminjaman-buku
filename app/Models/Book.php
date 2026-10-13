@@ -15,7 +15,7 @@ class Book extends Model
     use HasUuid, SoftDeletes;
 
     protected $fillable = [
-        'isbn', 'title', 'slug', 'category_id',
+        'no_hak', 'no_su', 'nama_pemilik', 'title', 'slug', 'category_id',
         'publication_year', 'edition', 'language', 'page_count',
         'description', 'cover_path', 'rack_id', 'is_active',
         'created_by', 'updated_by',

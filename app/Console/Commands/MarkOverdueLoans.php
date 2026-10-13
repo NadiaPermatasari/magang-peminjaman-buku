@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\LoanStatus;
 use App\Models\Loan;
-use App\Support\Activity;
 use Illuminate\Console\Command;
 
 /**
@@ -21,18 +19,7 @@ class MarkOverdueLoans extends Command
 
     public function handle(): int
     {
-        $loans = Loan::where('status', LoanStatus::BORROWED)
-            ->where('due_at', '<', now())
-            ->get();
-
-        foreach ($loans as $loan) {
-            $loan->items()->where('status', LoanStatus::BORROWED)->update(['status' => LoanStatus::OVERDUE]);
-            $loan->update(['status' => LoanStatus::OVERDUE]);
-
-            Activity::log('LOAN_OVERDUE', "Loan {$loan->code} marked overdue", $loan);
-        }
-
-        $this->info("Marked {$loans->count()} loan(s) as overdue.");
+        $this->info('Marked '.Loan::syncOverdue().' loan(s) as overdue.');
 
         return self::SUCCESS;
     }

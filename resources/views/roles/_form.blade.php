@@ -2,7 +2,7 @@
   $isEdit = $role->exists;
   $groupLabels = [
     'dashboard' => 'Dashboard', 'books' => 'Buku', 'book-copies' => 'Eksemplar Buku',
-    'categories' => 'Kategori', 'racks' => 'Rak',
+    'categories' => 'Jenis Hak', 'racks' => 'Rak',
     'members' => 'Anggota', 'loans' => 'Peminjaman', 'loan-extensions' => 'Perpanjangan', 'returns' => 'Pengembalian',
     'reports' => 'Laporan', 'users' => 'User', 'roles' => 'Role', 'permissions' => 'Permission',
     'settings' => 'Pengaturan', 'audit-logs' => 'Audit Log', 'security-dashboard' => 'Security Dashboard',

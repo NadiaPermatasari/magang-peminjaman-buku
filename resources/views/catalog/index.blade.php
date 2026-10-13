@@ -8,12 +8,12 @@
     <x-slot:actions>
       <form method="GET" action="{{ route('catalog.index') }}" class="flex flex-wrap items-center gap-2">
         <select name="category" onchange="this.form.submit()" class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20">
-          <option value="">Semua kategori</option>
+          <option value="">Semua jenis hak</option>
           @foreach ($categories as $category)
             <option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>
           @endforeach
         </select>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul/ISBN..." class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20" />
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul/no. hak/no. SU/pemilik..." class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20" />
       </form>
     </x-slot:actions>
 
@@ -24,7 +24,7 @@
             <img src="{{ $book->cover_url ?? asset('assets/img/theme/bootstrap.jpg') }}" class="object-cover w-full h-48 rounded-t-2xl" alt="{{ $book->title }}" />
             <div class="flex-auto p-4">
               <h6 class="mb-1 text-sm dark:text-white">{{ $book->title }}</h6>
-              <p class="mb-2 text-xs text-slate-400">{{ $book->category?->name ?: 'Tanpa kategori' }}</p>
+              <p class="mb-2 text-xs text-slate-400">{{ $book->category?->name ?: 'Tanpa jenis hak' }}</p>
               <span class="px-2 py-0.5 text-xxs font-bold uppercase rounded-md {{ $book->available_count > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600' }}">
                 {{ $book->available_count > 0 ? $book->available_count.' tersedia' : 'Tidak tersedia' }}
               </span>

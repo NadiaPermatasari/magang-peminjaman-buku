@@ -24,7 +24,7 @@
   $masterData = [
     ['label' => 'Buku',           'route' => 'books.index',       'active' => 'books.*',        'icon' => 'ni ni-book-bookmark',  'color' => 'text-blue-500',    'permission' => 'books.view'],
     ['label' => 'Eksemplar Buku', 'route' => 'book-copies.index', 'active' => 'book-copies.*',  'icon' => 'ni ni-single-copy-04', 'color' => 'text-orange-500',  'permission' => 'book-copies.view'],
-    ['label' => 'Kategori',       'route' => 'categories.index',  'active' => 'categories.*',   'icon' => 'ni ni-tag',            'color' => 'text-emerald-500', 'permission' => 'categories.view'],
+    ['label' => 'Jenis Hak',      'route' => 'categories.index',  'active' => 'categories.*',   'icon' => 'ni ni-tag',            'color' => 'text-emerald-500', 'permission' => 'categories.view'],
     ['label' => 'Rak',            'route' => 'racks.index',       'active' => 'racks.*',        'icon' => 'ni ni-map-big',        'color' => 'text-slate-700',   'permission' => 'racks.view'],
   ];
 
@@ -92,7 +92,7 @@
 
   $groups = [
     ['title' => 'Master Data', 'icon' => 'ni ni-collection', 'items' => $visible($masterData)],
-    ['title' => 'Transaksi', 'icon' => 'ni ni-cart', 'items' => $visible($transactions)],
+    ['title' => 'Pengajuan & Perpanjangan Peminjam', 'icon' => 'ni ni-cart', 'items' => $visible($transactions)],
     ['title' => 'Laporan', 'icon' => 'ni ni-chart-bar-32', 'items' => $visible($reports)],
     ['title' => 'Administrasi', 'icon' => 'ni ni-settings-gear-65', 'items' => $visible($administration)],
   ];

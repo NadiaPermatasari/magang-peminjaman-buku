@@ -27,8 +27,8 @@ class DemoMasterDataSeeder extends Seeder
             return;
         }
 
-        $categories = collect(['Fiksi', 'Non-Fiksi', 'Teknologi', 'Sejarah'])
-            ->map(fn ($name) => Category::create(['name' => $name, 'slug' => Str::slug($name)]));
+        $categories = collect(['Hak Milik', 'Hak Guna Usaha', 'Hak Pakai', 'Hak Pengelolaan', 'Lainnya'])
+            ->map(fn ($name) => Category::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name]));
 
         $racks = collect([
             ['code' => 'A1', 'name' => 'Rak Fiksi A1', 'location' => 'Lantai 1'],
@@ -43,7 +43,9 @@ class DemoMasterDataSeeder extends Seeder
 
         foreach ($titles as $i => $title) {
             $book = Book::create([
-                'isbn' => '978'.random_int(1000000000, 9999999999),
+                'no_hak' => (string) random_int(100, 9999),
+                'no_su' => random_int(1, 999).'/'.random_int(1990, 2024),
+                'nama_pemilik' => 'Pemilik '.$title,
                 'title' => $title,
                 'slug' => Str::slug($title),
                 'category_id' => $categories->random()->id,

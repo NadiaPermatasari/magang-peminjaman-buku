@@ -124,7 +124,7 @@ class BookCopyController extends Controller
             'barcode' => $copy->barcode,
             'status' => $copy->status->value,
             'status_label' => $copy->status->label(),
-            'book' => ['title' => $copy->book->title, 'isbn' => $copy->book->isbn],
+            'book' => ['title' => $copy->book->title, 'no_hak' => $copy->book->no_hak],
         ]);
     }
 }

@@ -13,12 +13,12 @@
     <x-slot:actions>
       <form method="GET" action="{{ route('books.index') }}" class="flex flex-wrap items-center gap-2">
         <select name="category" onchange="this.form.submit()" class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20">
-          <option value="">Semua kategori</option>
+          <option value="">Semua jenis hak</option>
           @foreach ($categories as $category)
             <option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>{{ $category->name }}</option>
           @endforeach
         </select>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul/ISBN..." class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20" />
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul/no. hak/no. SU/pemilik..." class="text-sm rounded-lg border border-solid border-gray-300 px-3 py-2 dark:bg-slate-850 dark:text-white dark:border-white/20" />
       </form>
       @can('create', App\Models\Book::class)
         <x-button href="{{ route('books.create') }}" icon="fas fa-plus">Tambah buku</x-button>
@@ -30,7 +30,7 @@
         <thead class="align-bottom">
           <tr>
             <th class="{{ $th }}">Buku</th>
-            <th class="{{ $th }}">Kategori</th>
+            <th class="{{ $th }}">Jenis Hak</th>
             <th class="{{ $th }} text-center">Eksemplar</th>
             <th class="{{ $th }} text-center">Status</th>
             <th class="{{ $th }} text-center">Aksi</th>
@@ -44,7 +44,7 @@
                   <img src="{{ $book->cover_url ?? asset('assets/img/theme/bootstrap.jpg') }}" class="object-cover w-9 h-12 mr-3 rounded-md" alt="" />
                   <div>
                     <h6 class="mb-0 text-sm leading-normal dark:text-white">{{ $book->title }}</h6>
-                    <p class="mb-0 text-xs leading-tight text-slate-400">{{ $book->isbn ?: '—' }}</p>
+                    <p class="mb-0 text-xs leading-tight text-slate-400">Hak {{ $book->no_hak ?: '—' }} · SU {{ $book->no_su ?: '—' }}@if ($book->nama_pemilik) · {{ $book->nama_pemilik }}@endif</p>
                   </div>
                 </div>
               </td>

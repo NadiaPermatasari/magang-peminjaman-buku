@@ -24,7 +24,9 @@ class StoreBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'isbn' => ['nullable', 'string', 'max:20', Rule::unique('books', 'isbn')],
+            'no_hak' => ['nullable', 'string', 'max:50'],
+            'no_su' => ['nullable', 'string', 'max:50'],
+            'nama_pemilik' => ['nullable', 'string', 'max:255'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:270', 'alpha_dash', Rule::unique('books', 'slug')],
             'category_id' => ['required', Rule::exists('categories', 'id')],

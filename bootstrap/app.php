@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SyncOverdueLoans;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SecurityHeaders::class,
             // Invalidates other sessions when the current password changes.
             AuthenticateSession::class,
+            SyncOverdueLoans::class,
         ]);
 
         $middleware->alias([

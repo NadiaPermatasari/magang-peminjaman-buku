@@ -24,7 +24,7 @@ class BookController extends Controller
         $books = Book::query()
             ->with('category')
             ->withCount('copies')
-            ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%")->orWhere('isbn', 'like', "%{$search}%"))
+            ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%")->orWhere('no_hak', 'like', "%{$search}%")->orWhere('no_su', 'like', "%{$search}%")->orWhere('nama_pemilik', 'like', "%{$search}%"))
             ->when($categoryId, fn ($q) => $q->where('category_id', $categoryId))
             ->latest()
             ->paginate((int) setting('per_page', 10))

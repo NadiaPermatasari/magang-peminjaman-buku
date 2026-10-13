@@ -62,7 +62,17 @@
                 @endforeach
                 <x-form.error name="photo" />
               </td>
-              <td class="{{ $td }} text-center text-xs whitespace-nowrap text-slate-400">{{ $loan->due_at?->format('d/m/Y') }}</td>
+              <td class="{{ $td }} text-center text-xs whitespace-nowrap text-slate-400">
+                {{ $loan->due_at?->format('d/m/Y') }}
+                @if ($loan->due_at)
+                  @php $days = (int) floor(abs($loan->due_at->diffInDays(now()))); @endphp
+                  @if ($loan->due_at->isPast())
+                    <span class="block mt-0.5 font-bold text-red-600">Terlambat {{ $days }} hari</span>
+                  @else
+                    <span class="block mt-0.5 font-semibold text-emerald-600">Sisa {{ $days }} hari</span>
+                  @endif
+                @endif
+              </td>
               <td class="{{ $td }} text-center">
                 <span class="bg-gradient-to-tl {{ $loan->status->badgeColor() }} px-2.5 text-xs rounded-1.8 py-1.4 inline-block whitespace-nowrap text-center align-baseline font-bold uppercase leading-none text-white">{{ $loan->status->label() }}</span>
               </td>

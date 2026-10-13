@@ -57,7 +57,7 @@
     <div class="grid max-w-5xl grid-cols-3 gap-2 p-6 mx-auto bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl sm:gap-6 sm:p-8">
       @foreach ([
         ['icon' => 'ni ni-book-bookmark', 'value' => $stats['totalBooks'], 'label' => 'Judul Buku'],
-        ['icon' => 'ni ni-tag', 'value' => $stats['totalCategories'], 'label' => 'Kategori'],
+        ['icon' => 'ni ni-tag', 'value' => $stats['totalCategories'], 'label' => 'Jenis Hak'],
         ['icon' => 'ni ni-circle-08', 'value' => $stats['totalMembers'], 'label' => 'Anggota Terdaftar'],
       ] as $i => $stat)
         <div class="flex flex-col items-center px-2 text-center {{ $i > 0 ? 'border-l border-solid border-gray-100 dark:border-white/10' : '' }}">

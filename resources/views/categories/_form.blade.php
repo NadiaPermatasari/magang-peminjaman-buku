@@ -2,7 +2,7 @@
 
 <div class="flex flex-wrap -mx-3">
   <div class="w-full max-w-full px-3 md:w-6/12">
-    <x-form.input name="name" label="Nama kategori" :value="$category->name" required />
+    <x-form.input name="name" label="Nama jenis hak" :value="$category->name" required />
   </div>
   <div class="w-full max-w-full px-3 md:w-6/12">
     <x-form.input name="slug" label="Slug" :value="$category->slug" help="Kosongkan untuk dibuat otomatis dari nama." />

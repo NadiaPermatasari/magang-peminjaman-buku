@@ -28,7 +28,7 @@
               <td class="{{ $td }} text-sm dark:text-white">{{ $loan->member->name }}</td>
               <td class="{{ $td }} text-xs text-slate-400">{{ $loan->items->pluck('book.title')->join(', ') }}</td>
               <td class="{{ $td }} text-center text-xs text-slate-400">{{ $loan->due_at?->format('d/m/Y') }}</td>
-              <td class="{{ $td }} text-center text-xs font-semibold text-red-600">{{ $loan->due_at?->diffInDays(now()) }} hari</td>
+              <td class="{{ $td }} text-center text-xs font-semibold text-red-600">{{ (int) floor(abs($loan->due_at?->diffInDays(now()) ?? 0)) }} hari</td>
             </tr>
           @empty
             <tr><td colspan="5" class="p-6 text-sm text-center dark:text-white/80">Tidak ada keterlambatan.</td></tr>

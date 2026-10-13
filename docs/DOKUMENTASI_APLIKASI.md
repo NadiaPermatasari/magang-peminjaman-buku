@@ -18,6 +18,7 @@ Dokumen ini merangkum **seluruh** aplikasi dalam satu file: apa aplikasi ini, fi
 10. [Enkripsi & Perlindungan Data](#10-enkripsi--perlindungan-data)
 11. [Pengujian (Testing)](#11-pengujian-testing)
 12. [Environment Variable & Secret Penting](#12-environment-variable--secret-penting)
+    - [Riwayat Perubahan Terbaru](#12b-riwayat-perubahan-terbaru-oktober-2026)
 13. [Lampiran: Dokumentasi Lengkap per Topik](#13-lampiran-dokumentasi-lengkap-per-topik)
     - [13.1 Arsitektur](#131-lampiran--arsitektur-docsarchitecturemd)
     - [13.2 Keamanan Aplikasi Detail](#132-lampiran--keamanan-aplikasi-detail-docssecuritymd)
@@ -31,7 +32,7 @@ Dokumen ini merangkum **seluruh** aplikasi dalam satu file: apa aplikasi ini, fi
 
 **Sistem Informasi Peminjaman Buku** adalah aplikasi manajemen perpustakaan berbasis web yang dibangun dengan Laravel 12. Aplikasi ini dibuat untuk menggantikan proses pencatatan manual (buku besar/Excel) dengan sistem digital yang mengelola siklus hidup lengkap sebuah perpustakaan:
 
-- **Katalog** buku dan eksemplar fisiknya (satu judul buku bisa punya banyak eksemplar/kopi fisik, masing-masing dengan barcode sendiri).
+- **Katalog arsip/berkas** beserta eksemplar fisiknya. Setiap berkas dicatat dengan **No. Hak, No. SU, Nama Pemilik, dan Jenis Hak** (Hak Milik, Hak Guna Usaha, Hak Pakai, Hak Pengelolaan, Lainnya). Satu judul bisa punya banyak eksemplar/kopi fisik, masing-masing dengan barcode sendiri. (Di kode dan URL entitas ini tetap bernama `Book`/`books`; yang berubah adalah label tampilan dan kolomnya.)
 - **Keanggotaan** — data anggota perpustakaan dengan data pribadi sensitif (NIK, alamat, telepon) yang dilindungi enkripsi.
 - **Peminjaman** — dari pengajuan anggota, verifikasi petugas, serah-terima fisik dengan bukti foto, sampai pengembalian (juga dengan bukti foto).
 - **Perpanjangan peminjaman** (banding) — anggota mengajukan tambahan hari, petugas/admin menyetujui atau menolak.
@@ -47,9 +48,10 @@ Target pengguna: instansi perpustakaan (sekolah, kampus, atau umum) dengan beber
 ## 2. Fitur-Fitur Utama
 
 ### Master Data
-- **Buku** — judul, ISBN, kategori, rak, sampul (upload gambar), status aktif/nonaktif.
+- **Buku/Berkas** — judul, **No. Hak**, **No. SU**, **Nama Pemilik**, **Jenis Hak**, rak, deskripsi, sampul (upload gambar), status aktif/nonaktif. Kolom `isbn` lama diubah namanya menjadi `no_hak` (tidak lagi unik, maks 50 karakter); `no_su` dan `nama_pemilik` ditambahkan. Pencarian di Buku dan Katalog mencakup judul, No. Hak, No. SU, dan Nama Pemilik.
 - **Eksemplar Buku** — barcode unik per kopi fisik, kondisi (baik/rusak ringan/rusak berat/hilang), status (tersedia/dipinjam/dipesan/perbaikan/hilang).
-- **Kategori, Rak** — CRUD standar dengan pencarian, filter, dan pagination.
+- **Jenis Hak** (sebelumnya *Kategori*) — memakai tabel `categories`; diisi otomatis oleh migrasi dengan lima nilai baku: Hak Milik, Hak Guna Usaha, Hak Pakai, Hak Pengelolaan, Lainnya. Tetap bisa ditambah/diubah lewat menu *Master Data > Jenis Hak*; deskripsi tidak berubah.
+- **Rak** — CRUD standar dengan pencarian, filter, dan pagination.
 
 ### Keanggotaan
 - Data anggota dengan **field sensitif terenkripsi** (telepon, alamat, NIK — lihat [§10](#10-enkripsi--perlindungan-data)).
@@ -57,7 +59,9 @@ Target pengguna: instansi perpustakaan (sekolah, kampus, atau umum) dengan beber
 - Anggota bisa punya akun login sendiri (opsional, tertaut ke tabel `users`) untuk mengajukan peminjaman mandiri. Kata sandinya diatur langsung oleh petugas saat menambah atau mengubah anggota — tidak bergantung pada email verifikasi/reset, sehingga anggota bisa langsung masuk.
 
 ### Peminjaman, Pengembalian & Perpanjangan
-Lihat diagram alur lengkap di [§7](#7-alur-bisnis-peminjaman-pengembalian--perpanjangan). Ringkas: anggota (atau petugas atas nama anggota) mengajukan → petugas menyetujui/menolak → serah-terima fisik disertai bukti foto → pengembalian dicatat dengan memilih eksemplar dan mengunggah bukti foto. Selama masa pinjam, anggota bisa mengajukan **perpanjangan (banding)** yang di-acc atau ditolak admin.
+Lihat diagram alur lengkap di [§7](#7-alur-bisnis-peminjaman-pengembalian--perpanjangan). Ringkas: anggota (atau petugas atas nama anggota) mengajukan → petugas menyetujui/menolak → serah-terima fisik disertai bukti foto → pengembalian dicatat dengan memilih eksemplar dan mengunggah bukti foto. Selama masa pinjam, anggota bisa mengajukan **perpanjangan (banding)** yang di-acc atau ditolak admin. Di sidebar, grup menu ini bernama **Pengajuan & Perpanjangan Peminjam** (sebelumnya *Transaksi*).
+
+**Status jatuh tempo & terlambat**: halaman *Peminjaman Aktif* menampilkan **"Sisa N hari"** (hijau) atau **"Terlambat N hari"** (merah) di bawah tanggal jatuh tempo, dan halaman *Keterlambatan* menampilkan jumlah hari terlambat (bilangan bulat). Peminjaman yang melewati jatuh tempo dipindah ke status OVERDUE secara otomatis — lihat §7.
 
 ### Notifikasi & Reminder Otomatis
 Pengingat pengambilan, jatuh tempo, dan keterlambatan dikirim otomatis lewat scheduler (email + in-app + WhatsApp), lihat [§8](#8-notifikasi-email-in-app-whatsappfonnte).
@@ -115,7 +119,8 @@ app/
 ├── Http/
 │   ├── Controllers/       Tipis: validasi via FormRequest, otorisasi via
 │   │                      Policy, delegasi ke Action class
-│   ├── Middleware/        SecurityHeaders (header keamanan di semua respons)
+│   ├── Middleware/        SecurityHeaders (header keamanan di semua respons),
+│   │                      SyncOverdueLoans (sinkron status Terlambat saat halaman dibuka)
 │   └── Requests/          Satu FormRequest per operasi tulis (validasi terpusat)
 ├── Models/                Eloquent + relasi; casting encrypted/enum
 ├── Notifications/         Satu class per jenis notifikasi, channel
@@ -165,8 +170,8 @@ Tabel utama (di luar tabel bawaan Laravel/Fortify/Spatie seperti `users`, `passw
 |---|---|
 | `settings` | Key-value pengaturan aplikasi (di-cache, lihat `App\Models\Setting`) |
 | `activity_logs` | Audit trail append-only |
-| `categories`, `racks` | Master data pendukung buku |
-| `books` | Judul buku (kategori + rak; modul penulis/penerbit sudah dihapus) |
+| `categories`, `racks` | Master data pendukung buku (`categories` ditampilkan sebagai **Jenis Hak**) |
+| `books` | Judul berkas: `no_hak`, `no_su`, `nama_pemilik`, `category_id` (= Jenis Hak), rak; modul penulis/penerbit sudah dihapus. Kolom `isbn` lama sudah diganti `no_hak` oleh migrasi `2026_10_13_000001_convert_books_to_land_rights` |
 | `book_copies` | Eksemplar fisik per buku, barcode unik, status & kondisi |
 | `members` | Data anggota — **berisi field terenkripsi**, lihat [§10](#10-enkripsi--perlindungan-data) |
 | `loan_number_sequences` | Counter harian untuk pembuatan kode peminjaman (aman dari race condition) |
@@ -185,7 +190,7 @@ Otorisasi **selalu** lewat pemeriksaan permission (`$user->can('...')`) atau Pol
 | Role | Ringkasan Akses |
 |---|---|
 | `super-admin` | Seluruh permission. Satu-satunya yang bisa mengelola User, Role & Permission, Pengaturan Aplikasi (termasuk keamanan), dan melihat Audit Log/Security Dashboard penuh. |
-| `admin-perpustakaan` | Kelola penuh master data (buku, eksemplar, kategori, rak), anggota beserta akun loginnya, seluruh transaksi peminjaman/pengembalian/perpanjangan, dan laporan. |
+| `admin-perpustakaan` | Kelola penuh master data (buku, eksemplar, jenis hak, rak), anggota beserta akun loginnya, seluruh transaksi peminjaman/pengembalian/perpanjangan, dan laporan. |
 | `petugas` | Lihat master data, ajukan peminjaman atas nama anggota, verifikasi peminjaman, serah-terima (handover), proses pengembalian, putuskan perpanjangan. Tidak bisa mengubah master data. |
 | `anggota` | Lihat katalog, ajukan/batalkan peminjaman sendiri, ajukan perpanjangan, lihat riwayatnya sendiri saja. |
 | `pimpinan` | Akses baca-saja — hanya dashboard & laporan. |
@@ -231,7 +236,7 @@ Anggota mengajukan
         │ serah-terima + bukti foto                      ▼
         ▼                                              EXPIRED (selesai,
      BORROWED ──── melewati jatuh tempo ────┐            eksemplar dilepas)
-        │   ▲                               │ (otomatis via scheduler)
+        │   ▲                               │ (otomatis, lihat bawah)
         │   │ perpanjangan di-acc admin     ▼
         │   └─────────────────────────── OVERDUE
         │ pilih eksemplar + bukti foto      │
@@ -243,9 +248,11 @@ PENDING/APPROVED juga bisa dibatalkan anggota (sebelum diproses)
 atau petugas/admin.
 ```
 
+**Status Terlambat otomatis**: logika `Loan::syncOverdue()` memindahkan peminjaman BORROWED yang `due_at`-nya sudah lewat menjadi OVERDUE (beserta item-nya) dan mencatat audit `LOAN_OVERDUE`. Dipanggil dari dua tempat: (1) scheduler `loans:mark-overdue` tiap jam, dan (2) middleware web `SyncOverdueLoans` yang berjalan saat pengguna login membuka halaman (permintaan aman/GET, dibatasi sekali per menit lewat cache). Dengan begitu status tetap benar walau cron belum terpasang. Proses ini idempoten.
+
 **Titik kunci konkurensi**: saat menyetujui peminjaman, sistem mengunci baris eksemplar yang berstatus tersedia (`lockForUpdate()`) sehingga **dua persetujuan bersamaan untuk buku yang sama tidak akan pernah mengambil eksemplar fisik yang sama** — diuji otomatis di test suite.
 
-**Perpanjangan / banding**: selama peminjaman berstatus BORROWED atau OVERDUE, anggota dapat mengajukan tambahan hari beserta alasannya dari halaman detail peminjaman. Petugas/admin memutuskan dari menu **Transaksi > Perpanjangan**:
+**Perpanjangan / banding**: selama peminjaman berstatus BORROWED atau OVERDUE, anggota dapat mengajukan tambahan hari beserta alasannya dari halaman detail peminjaman. Petugas/admin memutuskan dari menu **Pengajuan & Perpanjangan Peminjam > Perpanjangan**:
 ```
 base       = jatuh tempo lama bila masih di masa depan, selain itu hari ini
 jatuh tempo baru = base + jumlah hari yang disetujui
@@ -434,7 +441,7 @@ php artisan test
 
 Test memakai database **SQLite in-memory** (dikonfigurasi khusus untuk lingkungan test) sehingga **database development/produksi tidak pernah tersentuh** oleh proses testing.
 
-Cakupan pengujian mencakup: autentikasi & 2FA, batasan RBAC per role, IDOR (anggota tidak bisa melihat data anggota lain), alur peminjaman penuh (termasuk mencegah dua persetujuan mengambil eksemplar fisik yang sama secara bersamaan), perpanjangan peminjaman, bukti foto serah terima & pengembalian, pembuatan akun login anggota (termasuk anggota benar-benar bisa login), render seluruh halaman, manajemen Role & Permission (termasuk proteksi role bawaan), notifikasi WhatsApp/Fonnte (terkirim/tidak terkirim sesuai kondisi), pengaturan aplikasi, serta kontrol keamanan (CSRF, mass assignment, validasi upload file, anggota nonaktif diblokir meminjam).
+Cakupan pengujian mencakup: autentikasi & 2FA, batasan RBAC per role, IDOR (anggota tidak bisa melihat data anggota lain), alur peminjaman penuh (termasuk mencegah dua persetujuan mengambil eksemplar fisik yang sama secara bersamaan), perpanjangan peminjaman, bukti foto serah terima & pengembalian, pembuatan akun login anggota (termasuk anggota benar-benar bisa login), render seluruh halaman (termasuk Security Dashboard), pencatatan berkas dengan No. Hak/No. SU/Nama Pemilik, perpindahan otomatis ke status Terlambat beserta tampilan "Terlambat N hari", manajemen Role & Permission (termasuk proteksi role bawaan), notifikasi WhatsApp/Fonnte (terkirim/tidak terkirim sesuai kondisi), pengaturan aplikasi, serta kontrol keamanan (CSRF, mass assignment, validasi upload file, anggota nonaktif diblokir meminjam).
 
 ---
 
@@ -453,6 +460,17 @@ Selain variabel standar Laravel, beberapa key khusus aplikasi ini (lihat `.env.e
 | `SESSION_SECURE_COOKIE` | Wajib diisi `true` saat produksi sudah berjalan di HTTPS |
 
 **Tidak pernah** commit file `.env` ke Git (sudah masuk `.gitignore`). Semua secret di atas harus berbeda nilainya antar environment.
+
+---
+
+## 12b. Riwayat Perubahan Terbaru (Oktober 2026)
+
+- **Istilah tampilan**: grup menu *Transaksi* → *Pengajuan & Perpanjangan Peminjam*; *Kategori* → *Jenis Hak*; *Statistik Kategori* → *Statistik Jenis Hak*.
+- **Data berkas**: ISBN → *No. Hak*; ditambah *No. SU* dan *Nama Pemilik*; Jenis Hak berisi 5 nilai baku (migrasi `2026_10_13_000001_convert_books_to_land_rights`; `php artisan migrate`). Seeder demo ikut diperbarui.
+- **Status terlambat otomatis** tanpa bergantung cron (`Loan::syncOverdue()` + middleware `SyncOverdueLoans`).
+- **Tampilan jatuh tempo**: "Sisa N hari"/"Terlambat N hari" di *Peminjaman Aktif*; jumlah hari di *Keterlambatan* kini bilangan bulat.
+- **Pengujian**: 123 tes lulus, termasuk tes baru untuk perpindahan otomatis ke Terlambat, Security Dashboard, dan penyimpanan berkas dengan No. Hak/No. SU/Nama Pemilik.
+- Nama rute, tabel, dan kelas (`books`, `categories`, `Book`, `Category`) sengaja **tidak diubah** agar tidak merusak kode lain; hanya label dan kolom yang berubah.
 
 ---
 
@@ -483,7 +501,8 @@ app/
 │   ├── Controllers/     Tipis: validasi via FormRequest, otorisasi via
 │   │                    Policy, delegasi ke Action class
 │   ├── Middleware/       EnsureTwoFactorEnabled,
-│   │                    PreventDisablingRequiredTwoFactor, SecurityHeaders
+│   │                    PreventDisablingRequiredTwoFactor, SecurityHeaders,
+│   │                    SyncOverdueLoans
 │   └── Requests/         Satu FormRequest per operasi tulis
 ├── Models/               Eloquent + relasi; casting encrypted/enum
 ├── Notifications/        Satu class per jenis notifikasi (spec §51),
@@ -496,7 +515,7 @@ app/
     └── Concerns/HasUuid.php  Trait UUID + route-model-binding
 ```
 
-> Catatan: `EnsureTwoFactorEnabled` dan `PreventDisablingRequiredTwoFactor` disebut di diagram folder asli tapi sudah **dihapus** dari kode saat ini karena 2FA diputuskan bersifat opsional untuk semua role (lihat §9.1). `app/Http/Middleware/` saat ini hanya berisi `SecurityHeaders`. Diagram di atas dipertahankan apa adanya seperti di `docs/architecture.md` sumbernya; lihat §4 untuk struktur folder yang sudah dimutakhirkan.
+> Catatan: `EnsureTwoFactorEnabled` dan `PreventDisablingRequiredTwoFactor` disebut di diagram folder asli tapi sudah **dihapus** dari kode saat ini karena 2FA diputuskan bersifat opsional untuk semua role (lihat §9.1). `app/Http/Middleware/` saat ini berisi `SecurityHeaders` dan `SyncOverdueLoans`. Diagram di atas dipertahankan apa adanya seperti di `docs/architecture.md` sumbernya; lihat §4 untuk struktur folder yang sudah dimutakhirkan.
 
 #### Alur Request Khas
 
@@ -530,7 +549,7 @@ Controller **tidak pernah** memanggil `$request->all()` untuk membuat/mengubah m
 | PHPUnit (bukan Pest) | Sudah terpasang di skeleton awal proyek. |
 | Test pakai SQLite in-memory | Spec §53 — strategi testing tidak boleh menyentuh database development/production. |
 
-#### Katalog vs Master Data "Buku"
+#### Katalog vs Master Data "Buku" (Berkas)
 
 Ada dua rute berbeda untuk buku yang sengaja dipisah:
 
@@ -650,7 +669,7 @@ Didefinisikan di `database/seeders/RolePermissionSeeder.php` (idempotent — ama
 | Role | Ringkasan |
 |---|---|
 | `super-admin` | Seluruh permission. Satu-satunya yang bisa mengelola User/Role/Permission, Pengaturan (termasuk keamanan), dan melihat Audit Log/Security Dashboard penuh. |
-| `admin-perpustakaan` | Kelola penuh master data (buku, eksemplar, kategori, rak), anggota beserta akun loginnya, verifikasi & kelola seluruh transaksi peminjaman/pengembalian/perpanjangan, laporan. |
+| `admin-perpustakaan` | Kelola penuh master data (buku, eksemplar, jenis hak, rak), anggota beserta akun loginnya, verifikasi & kelola seluruh transaksi peminjaman/pengembalian/perpanjangan, laporan. |
 | `petugas` | Lihat master data, ajukan peminjaman atas nama anggota, verifikasi peminjaman, penyerahan (handover), pengembalian, putuskan perpanjangan. Tidak bisa ubah master data. |
 | `anggota` | Lihat katalog, ajukan/batalkan peminjaman sendiri, ajukan perpanjangan, lihat riwayatnya sendiri. |
 | `pimpinan` | Read-only — dashboard & laporan saja. |
@@ -662,7 +681,7 @@ dashboard.view
 
 books.view / books.create / books.update / books.delete
 book-copies.view / book-copies.create / book-copies.update / book-copies.delete
-categories.view / categories.create / categories.update / categories.delete
+categories.view / categories.create / categories.update / categories.delete   (menu: Jenis Hak)
 racks.view / racks.create / racks.update / racks.delete
 
 members.view / members.create / members.update / members.delete
@@ -732,8 +751,8 @@ Anggota mengajukan (CreateLoan)
         │ (HandoverLoan)                                      ▼
         ▼                                                  EXPIRED (selesai,
      BORROWED ──── melewati due_at ────┐                    eksemplar dilepas)
-        │     ▲                        │ (MarkOverdueLoans,
-        │     │ perpanjangan disetujui │  via scheduler)
+        │     ▲                        │ (Loan::syncOverdue,
+        │     │ perpanjangan disetujui │   scheduler + middleware)
         │     │ (ApproveLoanExtension) ▼
         │     └───────────────────── OVERDUE
         │ pilih item + unggah            │
@@ -852,7 +871,7 @@ php artisan db:seed
 1. `RolePermissionSeeder` — membuat seluruh permission (lihat §13.3) dan 5 role default (`super-admin`, `admin-perpustakaan`, `petugas`, `anggota`, `pimpinan`). Idempotent, aman dijalankan berulang.
 2. `SuperAdminSeeder` — membuat akun super-admin awal dari `SUPER_ADMIN_EMAIL`/`SUPER_ADMIN_PASSWORD`.
 3. `ApplicationSettingSeeder` — mengisi nilai default untuk seluruh pengaturan aplikasi (identitas, branding, peminjaman, notifikasi).
-4. `DemoMasterDataSeeder` — data contoh (kategori, rak, buku + eksemplar, anggota beserta akun loginnya). **Otomatis dilewati saat `APP_ENV=production`.** Password anggota demo diambil dari `DEMO_MEMBER_PASSWORD` (default `Anggota123!`).
+4. `DemoMasterDataSeeder` — data contoh (jenis hak, rak, berkas + eksemplar, anggota beserta akun loginnya). **Otomatis dilewati saat `APP_ENV=production`.** Password anggota demo diambil dari `DEMO_MEMBER_PASSWORD` (default `Anggota123!`).
 
 Untuk reset penuh saat development:
 
@@ -893,7 +912,7 @@ php artisan queue:work
 
 Scheduler menjalankan tiga command setiap jam (lihat `routes/console.php`), semuanya idempotent — aman dijalankan berulang tanpa mengirim notifikasi duplikat:
 
-- `loans:mark-overdue` — menandai peminjaman yang melewati jatuh tempo
+- `loans:mark-overdue` — menandai peminjaman yang melewati jatuh tempo menjadi *Terlambat* (`Loan::syncOverdue()`). Pengecekan yang sama juga dijalankan otomatis maksimal sekali per menit saat pengguna login membuka halaman (middleware `SyncOverdueLoans`), sehingga status tetap benar walau cron belum terpasang
 - `loans:expire-approved` — membatalkan pengajuan yang disetujui tapi tidak diambil sebelum `pickup_deadline`
 - `loans:process-reminders` — mengirim reminder pengambilan/jatuh tempo/keterlambatan sesuai pengaturan Notifikasi
 
@@ -935,7 +954,7 @@ Lihat §13.3 untuk daftar lengkap permission dan pemetaan ke role. Otorisasi dip
 
 #### Halaman Depan (Landing Page) & SEO
 
-`/` menampilkan landing page publik untuk pengunjung yang belum login (pengguna yang sudah login otomatis diarahkan ke dashboard). Kontennya (judul & subjudul hero, gambar hero, teks "tentang", meta description) diatur Super Admin lewat **Pengaturan Aplikasi > Halaman Depan** — jumlah buku/kategori/anggota dan daftar koleksi terbaru selalu diambil live dari database.
+`/` menampilkan landing page publik untuk pengunjung yang belum login (pengguna yang sudah login otomatis diarahkan ke dashboard). Kontennya (judul & subjudul hero, gambar hero, teks "tentang", meta description) diatur Super Admin lewat **Pengaturan Aplikasi > Halaman Depan** — jumlah buku/jenis hak/anggota dan daftar koleksi terbaru selalu diambil live dari database.
 
 SEO yang sudah diterapkan:
 

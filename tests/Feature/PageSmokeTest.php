@@ -105,6 +105,36 @@ class PageSmokeTest extends TestCase
         $this->actingAs($user)->get("/loans/{$loan->uuid}")->assertOk();
     }
 
+    public function test_overdue_loan_moves_automatically_and_shows_late_days(): void
+    {
+        $this->seedRoles();
+        [$loan] = $this->seedDomainData();
+        $loan->update(['due_at' => now()->subDays(3)]);
+
+        $admin = $this->makeUser('super-admin');
+
+        $this->actingAs($admin)->get('/loans/active')->assertOk()->assertSee('Terlambat 3 hari');
+        $this->assertSame('OVERDUE', $loan->fresh()->status->value);
+        $this->actingAs($admin)->get('/loans/overdue')->assertOk()->assertSee($loan->code)->assertSee('3 hari');
+        $this->actingAs($admin)->get('/security-dashboard')->assertOk()->assertSee('Login Berhasil Hari Ini');
+    }
+
+    public function test_book_can_be_stored_with_land_right_fields(): void
+    {
+        $this->seedRoles();
+        $category = \App\Models\Category::factory()->create();
+
+        $this->actingAs($this->makeUser('super-admin'))->post('/books', [
+            'title' => 'Berkas Tanah A',
+            'category_id' => $category->id,
+            'no_hak' => '123',
+            'no_su' => '45/2020',
+            'nama_pemilik' => 'Budi',
+        ])->assertRedirect('/books');
+
+        $this->assertDatabaseHas('books', ['title' => 'Berkas Tanah A', 'no_hak' => '123', 'no_su' => '45/2020', 'nama_pemilik' => 'Budi']);
+    }
+
     /**
      * Satu peminjaman BORROWED + satu pengajuan perpanjangan menunggu, plus
      * satu anggota yang punya akun login — cukup untuk mengisi semua tabel.
