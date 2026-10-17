@@ -17,7 +17,6 @@ class RackController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $racks = Rack::query()
-            ->withCount('books')
             ->when($search !== '', fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"))
             ->orderBy('code')
             ->paginate((int) setting('per_page', 10))
@@ -61,10 +60,6 @@ class RackController extends Controller
     public function destroy(Rack $rack): RedirectResponse
     {
         $this->authorize('delete', $rack);
-
-        if ($rack->books()->exists()) {
-            return back()->with('error', 'Rak tidak dapat dihapus karena masih digunakan oleh buku.');
-        }
 
         Activity::log('RACK_DELETED', "Deleted rack {$rack->code}");
 

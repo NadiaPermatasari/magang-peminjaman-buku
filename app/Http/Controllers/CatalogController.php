@@ -39,7 +39,7 @@ class CatalogController extends Controller
     {
         abort_unless($book->is_active, 404);
 
-        $book->load(['category', 'rack']);
+        $book->load('category');
 
         return view('catalog.show', [
             'book' => $book,

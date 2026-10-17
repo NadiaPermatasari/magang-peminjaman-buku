@@ -26,7 +26,6 @@
             <th class="{{ $th }}">Kode</th>
             <th class="{{ $th }}">Nama</th>
             <th class="{{ $th }}">Lokasi</th>
-            <th class="{{ $th }} text-center">Jumlah Buku</th>
             <th class="{{ $th }} text-center">Aksi</th>
           </tr>
         </thead>
@@ -36,7 +35,6 @@
               <td class="{{ $td }} text-sm font-semibold dark:text-white">{{ $rack->code }}</td>
               <td class="{{ $td }} text-sm dark:text-white">{{ $rack->name }}</td>
               <td class="{{ $td }} text-xs text-slate-400">{{ $rack->location ?: '—' }}</td>
-              <td class="{{ $td }} text-center text-sm">{{ $rack->books_count }}</td>
               <td class="{{ $td }} text-center">
                 @can('update', $rack)
                   <a href="{{ route('racks.edit', $rack) }}" class="mr-3 text-xs font-semibold text-slate-400 hover:text-blue-500"><i class="mr-1 fas fa-pen"></i>Ubah</a>
@@ -50,7 +48,7 @@
               </td>
             </tr>
           @empty
-            <tr><td colspan="5" class="p-6 text-sm text-center dark:text-white/80">Belum ada rak.</td></tr>
+            <tr><td colspan="4" class="p-6 text-sm text-center dark:text-white/80">Belum ada rak.</td></tr>
           @endforelse
         </tbody>
       </table>

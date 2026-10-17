@@ -31,10 +31,6 @@
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">No. SU</span><br><span class="dark:text-white">{{ $book->no_su ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Nama Pemilik</span><br><span class="dark:text-white">{{ $book->nama_pemilik ?: '—' }}</span></div>
           <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Tahun Terbit</span><br><span class="dark:text-white">{{ $book->publication_year ?: '—' }}</span></div>
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Edisi</span><br><span class="dark:text-white">{{ $book->edition ?: '—' }}</span></div>
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Bahasa</span><br><span class="dark:text-white">{{ $book->language ?: '—' }}</span></div>
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Jumlah Halaman</span><br><span class="dark:text-white">{{ $book->page_count ?: '—' }}</span></div>
-          <div class="w-1/2 px-3 mb-2 md:w-1/3"><span class="text-slate-400">Rak</span><br><span class="dark:text-white">{{ $book->rack?->code ?: '—' }}</span></div>
         </div>
 
         @if ($book->description)

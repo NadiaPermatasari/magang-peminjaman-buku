@@ -59,7 +59,7 @@ class SettingController extends Controller
 
             // Peminjaman
             'loan_duration_days' => ['required', 'integer', 'min:1', 'max:365'],
-            'max_active_loans' => ['required', 'integer', 'min:1', 'max:50'],
+            'max_active_loans' => ['required', 'integer', 'min:1', 'max:'.Setting::MAX_ACTIVE_LOANS_LIMIT],
             'pickup_deadline_days' => ['required', 'integer', 'min:1', 'max:30'],
             'allow_renewal' => ['nullable', 'boolean'],
             'max_renewals' => ['required', 'integer', 'min:0', 'max:10'],

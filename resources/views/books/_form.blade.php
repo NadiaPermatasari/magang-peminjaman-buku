@@ -1,7 +1,6 @@
 @php
   $isEdit = $book->exists;
   $categoryOptions = $categories->pluck('name', 'id')->all();
-  $rackOptions = $racks->mapWithKeys(fn ($r) => [$r->id => "{$r->code} — {$r->name}"])->all();
 @endphp
 
 <div class="flex flex-wrap -mx-3">
@@ -18,25 +17,10 @@
     <x-form.input name="nama_pemilik" label="Nama pemilik" :value="$book->nama_pemilik" />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
-    <x-form.input name="slug" label="Slug" :value="$book->slug" help="Kosongkan untuk dibuat otomatis dari judul." />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-4/12">
     <x-form.select name="category_id" label="Jenis hak" :options="$categoryOptions" :selected="$book->category_id" required searchable />
   </div>
   <div class="w-full max-w-full px-3 md:w-4/12">
-    <x-form.select name="rack_id" label="Rak" :options="$rackOptions" :selected="$book->rack_id" searchable placeholder="Tanpa rak" />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-3/12">
     <x-form.input name="publication_year" label="Tahun terbit" type="number" :value="$book->publication_year" />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-3/12">
-    <x-form.input name="edition" label="Edisi" :value="$book->edition" />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-3/12">
-    <x-form.input name="language" label="Bahasa" :value="$book->language" />
-  </div>
-  <div class="w-full max-w-full px-3 md:w-3/12">
-    <x-form.input name="page_count" label="Jumlah halaman" type="number" :value="$book->page_count" />
   </div>
   <div class="w-full max-w-full px-3">
     <x-form.textarea name="description" label="Deskripsi" :value="$book->description" rows="4" maxlength="5000" counter />

@@ -14,7 +14,7 @@ class StoreLoanRequest extends FormRequest
 
     public function rules(): array
     {
-        $maxActiveLoans = (int) setting('max_active_loans', 3);
+        $maxActiveLoans = max_active_loans();
 
         return [
             // Hanya dipakai bila petugas mengajukan atas nama anggota; untuk

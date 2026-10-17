@@ -76,7 +76,7 @@
               <x-form.input name="loan_duration_days" label="Lama pinjam (hari)" type="number" min="1" :value="$settings['loan_duration_days']" required />
             </div>
             <div class="w-full max-w-full px-3 md:w-4/12">
-              <x-form.input name="max_active_loans" label="Maks. pinjaman aktif" type="number" min="1" :value="$settings['max_active_loans']" required />
+              <x-form.select name="max_active_loans" label="Maks. buku per anggota" :options="[1 => '1 buku', 2 => '2 buku']" :selected="max_active_loans()" required help="Jumlah buku yang boleh dipinjam sekaligus oleh satu orang." />
             </div>
             <div class="w-full max-w-full px-3 md:w-4/12">
               <x-form.input name="pickup_deadline_days" label="Batas pengambilan (hari)" type="number" min="1" :value="$settings['pickup_deadline_days']" required />

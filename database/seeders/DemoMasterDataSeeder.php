@@ -30,11 +30,11 @@ class DemoMasterDataSeeder extends Seeder
         $categories = collect(['Hak Milik', 'Hak Guna Usaha', 'Hak Pakai', 'Hak Pengelolaan', 'Lainnya'])
             ->map(fn ($name) => Category::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name]));
 
-        $racks = collect([
+        collect([
             ['code' => 'A1', 'name' => 'Rak Fiksi A1', 'location' => 'Lantai 1'],
             ['code' => 'B1', 'name' => 'Rak Non-Fiksi B1', 'location' => 'Lantai 1'],
             ['code' => 'C1', 'name' => 'Rak Teknologi C1', 'location' => 'Lantai 2'],
-        ])->map(fn ($rack) => Rack::create($rack));
+        ])->each(fn ($rack) => Rack::create($rack));
 
         $titles = [
             'Bumi Manusia', 'Laskar Pelangi', 'Negeri 5 Menara', 'Supernova',
@@ -50,10 +50,7 @@ class DemoMasterDataSeeder extends Seeder
                 'slug' => Str::slug($title),
                 'category_id' => $categories->random()->id,
                 'publication_year' => random_int(1990, 2024),
-                'language' => 'Indonesia',
-                'page_count' => random_int(120, 480),
                 'description' => "Deskripsi singkat untuk buku {$title}.",
-                'rack_id' => $racks->random()->id,
                 'is_active' => true,
             ]);
 

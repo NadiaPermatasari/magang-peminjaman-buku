@@ -53,6 +53,18 @@ class SettingsTest extends TestCase
         $response->assertSee('whatsapp_notification_enabled', false);
     }
 
+    public function test_max_active_loans_setting_only_accepts_one_or_two_books(): void
+    {
+        $this->seedRoles();
+        $admin = $this->makeUser('super-admin');
+
+        $response = $this->actingAs($admin)
+            ->withSession(['auth.password_confirmed_at' => time()])
+            ->put('/settings', $this->validSettingsPayload(['max_active_loans' => 3]));
+
+        $response->assertSessionHasErrors('max_active_loans');
+    }
+
     public function test_settings_update_without_confirmed_password_is_blocked(): void
     {
         $this->seedRoles();
@@ -73,7 +85,7 @@ class SettingsTest extends TestCase
             'timezone' => 'Asia/Jakarta',
             'per_page' => 10,
             'loan_duration_days' => 7,
-            'max_active_loans' => 3,
+            'max_active_loans' => 2,
             'pickup_deadline_days' => 2,
             'max_renewals' => 1,
             'pickup_reminder_hours' => 24,

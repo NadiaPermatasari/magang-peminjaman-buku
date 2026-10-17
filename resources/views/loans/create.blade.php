@@ -14,7 +14,7 @@
     <div class="w-full max-w-full px-3 mx-auto lg:w-8/12 lg:flex-none">
       <form method="POST" action="{{ route('loans.store') }}">
         @csrf
-        <x-card title="Ajukan Peminjaman" :subtitle="'Maksimum '.setting('max_active_loans', 3).' buku aktif sekaligus.'">
+        <x-card title="Ajukan Peminjaman" :subtitle="'Maksimum '.max_active_loans().' buku aktif sekaligus.'">
           <x-slot:actions>
             <x-button type="submit" icon="fas fa-paper-plane">Kirim Pengajuan</x-button>
           </x-slot:actions>

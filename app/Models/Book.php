@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Book extends Model
 {
@@ -16,8 +17,7 @@ class Book extends Model
 
     protected $fillable = [
         'no_hak', 'no_su', 'nama_pemilik', 'title', 'slug', 'category_id',
-        'publication_year', 'edition', 'language', 'page_count',
-        'description', 'cover_path', 'rack_id', 'is_active',
+        'publication_year', 'description', 'cover_path', 'is_active',
         'created_by', 'updated_by',
     ];
 
@@ -33,14 +33,24 @@ class Book extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function rack(): BelongsTo
-    {
-        return $this->belongsTo(Rack::class);
-    }
-
     public function copies(): HasMany
     {
         return $this->hasMany(BookCopy::class);
+    }
+
+    /**
+     * Slug dibuat otomatis dari judul; diberi akhiran -2, -3, ... bila sudah dipakai.
+     */
+    public static function uniqueSlug(string $title, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($title) ?: 'buku';
+        $slug = $base;
+
+        for ($i = 2; static::withTrashed()->where('slug', $slug)->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))->exists(); $i++) {
+            $slug = "{$base}-{$i}";
+        }
+
+        return $slug;
     }
 
     public function getCoverUrlAttribute(): ?string

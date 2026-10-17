@@ -6,7 +6,6 @@ use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Models\Book;
 use App\Models\Category;
-use App\Models\Rack;
 use App\Support\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +42,6 @@ class BookController extends Controller
         return view('books.create', [
             'book' => new Book,
             'categories' => Category::orderBy('name')->get(),
-            'racks' => Rack::orderBy('code')->get(),
         ]);
     }
 
@@ -72,7 +70,6 @@ class BookController extends Controller
         return view('books.edit', [
             'book' => $book,
             'categories' => Category::orderBy('name')->get(),
-            'racks' => Rack::orderBy('code')->get(),
         ]);
     }
 

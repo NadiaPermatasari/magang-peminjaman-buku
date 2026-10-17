@@ -12,6 +12,7 @@ use App\Enums\BookCondition;
 use App\Enums\BookCopyStatus;
 use App\Enums\LoanStatus;
 use App\Exceptions\LoanException;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\WithLibraryData;
 use Tests\TestCase;
@@ -165,5 +166,25 @@ class LoanFlowTest extends TestCase
 
         $this->expectException(LoanException::class);
         app(ApproveLoan::class)->handle($loan->fresh(), $staff);
+    }
+
+    public function test_member_cannot_borrow_more_books_than_the_configured_limit(): void
+    {
+        $this->seedRoles();
+        Setting::set('max_active_loans', 1);
+        $member = $this->makeMember($this->makeUser('anggota'));
+
+        app(CreateLoan::class)->handle($member, [$this->makeBookWithCopy()->id]);
+
+        $this->expectException(LoanException::class);
+        app(CreateLoan::class)->handle($member, [$this->makeBookWithCopy()->id]);
+    }
+
+    public function test_loan_limit_never_exceeds_two_books(): void
+    {
+        // Nilai lama yang tersimpan sebelum batas 1–2 buku diberlakukan.
+        Setting::set('max_active_loans', 3);
+
+        $this->assertSame(2, max_active_loans());
     }
 }

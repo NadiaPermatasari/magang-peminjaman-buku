@@ -9,6 +9,9 @@ class Setting extends Model
 {
     protected $fillable = ['key', 'value'];
 
+    /** Batas atas pengaturan max_active_loans: satu anggota maksimal 2 buku. */
+    public const MAX_ACTIVE_LOANS_LIMIT = 2;
+
     /**
      * Default values, used until a setting is saved from a Settings page
      * (spec §21). Keep this in sync with the fields Super Admin can edit —
@@ -36,7 +39,7 @@ class Setting extends Model
 
         // Peminjaman
         'loan_duration_days' => 7,
-        'max_active_loans' => 3,
+        'max_active_loans' => 2,
         'pickup_deadline_days' => 2,
         // Perpanjangan/banding peminjaman: allow_renewal mematikan fiturnya,
         // max_renewals membatasi berapa kali satu peminjaman boleh disetujui

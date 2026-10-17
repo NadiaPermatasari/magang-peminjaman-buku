@@ -94,7 +94,7 @@ class CreateLoan
             fn ($q) => $q->where('member_id', $member->id)->whereIn('status', $activeStatuses)
         )->whereIn('status', $activeStatuses)->count();
 
-        $maxActiveLoans = (int) setting('max_active_loans', 3);
+        $maxActiveLoans = max_active_loans();
 
         if ($activeItemCount + $requestedCount > $maxActiveLoans) {
             throw new LoanException("Batas maksimum peminjaman aktif ({$maxActiveLoans} buku) akan terlampaui.");
