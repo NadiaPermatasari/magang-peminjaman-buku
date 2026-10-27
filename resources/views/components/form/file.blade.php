@@ -11,7 +11,7 @@
   'preview' => null,
   'bag' => 'default',
   'id' => null,
-  'buttonText' => 'Choose file',
+  'buttonText' => 'Pilih file',
 ])
 
 @php
@@ -24,13 +24,13 @@
     <x-form.label :for="$id" :required="$required">{{ $label }}</x-form.label>
   @endif
 
-  <div class="flex items-center p-2 border border-solid rounded-lg {{ $hasError ? 'border-red-500' : 'border-gray-300 dark:border-white/20' }} bg-white dark:bg-slate-850">
-    <img data-file-preview data-placeholder="{{ $preview }}" src="{{ $preview }}" alt="" class="object-cover w-12 h-12 mr-3 rounded-lg {{ $preview ? '' : 'hidden' }}" />
-    <label for="{{ $id }}" class="inline-block px-4 py-2 mb-0 mr-3 text-xs font-bold leading-normal text-center text-white align-middle transition-all ease-in bg-slate-700 border-0 rounded-lg shadow-md cursor-pointer tracking-tight-rem hover:shadow-xs hover:-translate-y-px active:opacity-85 whitespace-nowrap">
+  <div class="flex flex-wrap items-center min-w-0 gap-2 p-2 border border-solid rounded-lg {{ $hasError ? 'border-red-500' : 'border-gray-300 dark:border-white/20' }} bg-white dark:bg-slate-850">
+    <img data-file-preview data-placeholder="{{ $preview }}" src="{{ $preview }}" alt="" class="object-cover w-12 h-12 rounded-lg shrink-0 {{ $preview ? '' : 'hidden' }}" />
+    <label for="{{ $id }}" class="inline-flex items-center justify-center min-h-11 px-4 py-2 mb-0 text-xs font-bold leading-normal text-center text-white align-middle transition-all ease-in bg-slate-700 border-0 rounded-lg shadow-md cursor-pointer tracking-tight-rem hover:shadow-xs hover:-translate-y-px active:opacity-85 whitespace-nowrap shrink-0">
       <i class="mr-1 fas fa-upload"></i> {{ $buttonText }}
     </label>
-    <span data-file-name data-placeholder="No file chosen" class="flex-1 min-w-0 text-sm truncate text-slate-500 dark:text-white/70">No file chosen</span>
-    <button type="button" data-file-clear class="hidden p-0 ml-2 text-sm bg-transparent border-0 cursor-pointer text-slate-400 hover:text-red-600" aria-label="Clear"><i class="fas fa-times"></i></button>
+    <span data-file-name data-placeholder="Belum ada file dipilih" class="order-last flex-1 min-w-0 text-sm truncate basis-full sm:order-none sm:basis-0 text-slate-500 dark:text-white/70">Belum ada file dipilih</span>
+    <button type="button" data-file-clear class="hidden p-2 text-sm bg-transparent border-0 rounded-lg cursor-pointer shrink-0 text-slate-400 hover:text-red-600" aria-label="Hapus pilihan file"><i class="fas fa-times"></i></button>
     <input type="file" id="{{ $id }}" name="{{ $name }}" class="sr-only" @if ($accept) accept="{{ $accept }}" @endif @if ($required) required @endif {{ $attributes->except('class') }} />
   </div>
 

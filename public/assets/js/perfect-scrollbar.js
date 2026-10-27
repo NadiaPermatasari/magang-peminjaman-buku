@@ -2,7 +2,7 @@
 // Waits until the async-loaded PerfectScrollbar plugin is available.
 (function () {
   var isWindows = navigator.platform.indexOf("Win") > -1;
-  if (!isWindows) return;
+  if (!isWindows || window.matchMedia("(pointer: coarse)").matches) return;
 
   function init() {
     if (typeof PerfectScrollbar === "undefined") {
@@ -11,11 +11,8 @@
 
     var instances = [];
 
-    if (document.querySelector("main")) {
-      instances.push(new PerfectScrollbar(document.querySelector("main")));
-    }
-
-    document.querySelectorAll(".overflow-auto, .overflow-y-auto, .overflow-x-auto").forEach(function (element) {
+    // Keep page/table scrolling native; .ps otherwise clips their content.
+    document.querySelectorAll("[sidenav-main] .overflow-y-auto").forEach(function (element) {
       instances.push(new PerfectScrollbar(element));
     });
 

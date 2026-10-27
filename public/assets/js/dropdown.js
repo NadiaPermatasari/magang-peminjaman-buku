@@ -1,29 +1,56 @@
-// Navbar notifications dropdown
+// Keep navbar menus inside the viewport, including narrow mobile screens.
+(function () {
+  var entries = [];
 
-var dropdown_triggers = document.querySelectorAll("[dropdown-trigger]");
-dropdown_triggers.forEach((dropdown_trigger) => {
-  let dropdown_menu = dropdown_trigger.parentElement.querySelector("[dropdown-menu]");
+  function close(entry, restoreFocus) {
+    entry.trigger.setAttribute("aria-expanded", "false");
+    entry.menu.classList.add("hidden");
+    if (restoreFocus) entry.trigger.focus();
+  }
 
-  dropdown_trigger.addEventListener("click", function () {
-    dropdown_menu.classList.toggle("opacity-0");
-    dropdown_menu.classList.toggle("pointer-events-none");
-    dropdown_menu.classList.toggle("before:-top-5");
-    if (dropdown_trigger.getAttribute("aria-expanded") == "false") {
-      dropdown_trigger.setAttribute("aria-expanded", "true");
-      dropdown_menu.classList.remove("transform-dropdown");
-      dropdown_menu.classList.add("transform-dropdown-show");
-    } else {
-      dropdown_trigger.setAttribute("aria-expanded", "false");
-      dropdown_menu.classList.remove("transform-dropdown-show");
-      dropdown_menu.classList.add("transform-dropdown");
-    }
+  function position(entry) {
+    var anchor = entry.trigger.parentElement.getBoundingClientRect();
+    var width = entry.menu.offsetWidth;
+    var left = Math.max(16, Math.min(anchor.right - width, window.innerWidth - width - 16));
+    entry.menu.style.left = (left - anchor.left) + "px";
+    entry.menu.style.right = "auto";
+    entry.menu.style.maxHeight = Math.max(120, window.innerHeight - anchor.bottom - 24) + "px";
+  }
+
+  document.querySelectorAll("[dropdown-trigger]").forEach(function (trigger) {
+    var menu = trigger.parentElement.querySelector("[dropdown-menu]");
+    if (!menu) return;
+    var entry = { trigger: trigger, menu: menu };
+    entries.push(entry);
+
+    trigger.addEventListener("click", function () {
+      var open = trigger.getAttribute("aria-expanded") !== "true";
+      entries.forEach(function (other) { close(other, false); });
+      if (!open) return;
+      menu.classList.remove("hidden");
+      trigger.setAttribute("aria-expanded", "true");
+      position(entry);
+    });
   });
 
-  window.addEventListener("click", function (e) {
-    if (!dropdown_menu.contains(e.target) && !dropdown_trigger.contains(e.target)) {
-      if (dropdown_trigger.getAttribute("aria-expanded") == "true") {
-        dropdown_trigger.click();
-      }
-    }
+  document.addEventListener("click", function (event) {
+    entries.forEach(function (entry) {
+      if (!entry.trigger.parentElement.contains(event.target)) close(entry, false);
+    });
   });
-});
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    entries.forEach(function (entry) {
+      if (entry.trigger.getAttribute("aria-expanded") === "true") close(entry, true);
+    });
+  });
+
+  window.addEventListener("resize", function () {
+    entries.forEach(function (entry) { close(entry, false); });
+  });
+
+  window.addEventListener("scroll", function () {
+    entries.forEach(function (entry) { close(entry, false); });
+  }, { passive: true });
+})();

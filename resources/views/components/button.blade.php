@@ -31,7 +31,7 @@
     'md' => 'px-6 py-2 text-xs',
     'lg' => 'px-8 py-3 text-sm',
   ];
-  $classes = 'inline-flex items-center justify-center font-bold leading-normal text-center align-middle transition-all ease-in rounded-lg cursor-pointer tracking-tight-rem hover:-translate-y-px active:opacity-85 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 '
+  $classes = 'app-button inline-flex items-center justify-center font-bold leading-normal text-center align-middle transition-all ease-in rounded-lg cursor-pointer tracking-tight-rem hover:-translate-y-px active:opacity-85 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 '
     .($variants[$variant] ?? $variants['primary']).' '
     .($variant === 'link' ? '' : ($sizes[$size] ?? $sizes['md']))
     .($block ? ' w-full' : '');

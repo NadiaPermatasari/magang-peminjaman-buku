@@ -23,14 +23,14 @@
 
   @include('layouts.partials.sidenav')
 
-  <main class="relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl">
+  <main class="app-main relative min-w-0 min-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl">
     @hasSection('navbar')
       @yield('navbar')
     @else
       @include('layouts.partials.navbar')
     @endif
 
-    <div class="w-full px-6 py-6 mx-auto">
+    <div class="app-content w-full px-4 py-5 mx-auto sm:px-6 sm:py-6">
       @include('layouts.partials.alerts')
 
       @yield('content')

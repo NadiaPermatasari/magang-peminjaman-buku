@@ -9,16 +9,16 @@
 
 @section('body')
   <nav class="sticky top-0 z-sticky bg-white/90 backdrop-blur-md border-b border-solid border-gray-100 dark:bg-slate-900/90 dark:border-white/10">
-    <div class="flex items-center justify-between max-w-6xl px-6 py-3 mx-auto">
-      <a href="{{ route('home') }}" class="flex items-center text-slate-700 dark:text-white">
+    <div class="flex items-center justify-between max-w-6xl gap-3 px-4 py-3 mx-auto sm:px-6">
+      <a href="{{ route('home') }}" class="flex items-center flex-1 min-w-0 text-slate-700 dark:text-white">
         @if (setting('logo'))
           <img src="{{ asset('storage/'.setting('logo')) }}" class="h-8 mr-2" alt="{{ app_name() }}" />
         @else
           <i class="mr-2 text-2xl text-blue-500 ni ni-books"></i>
         @endif
-        <span class="font-semibold">{{ app_name() }}</span>
+        <span class="min-w-0 text-sm font-semibold break-words sm:text-base">{{ app_name() }}</span>
       </a>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         @auth
           <x-button href="{{ route('dashboard') }}" size="sm" icon="fas fa-th-large">Ke Dashboard</x-button>
         @else

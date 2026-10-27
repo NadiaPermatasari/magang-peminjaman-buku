@@ -26,6 +26,8 @@ class SecurityHeaders
             "font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com data:",
             "img-src 'self' data: blob:",
             "connect-src 'self'",
+            "manifest-src 'self'",
+            "worker-src 'self'",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self'",

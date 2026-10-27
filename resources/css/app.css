@@ -18,6 +18,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shared responsive layout: keep scrolling on the document and table regions. */
+.app-main { overflow-wrap: anywhere; }
+.app-content, .card-actions form { min-width: 0; max-width: 100%; }
+[sidenav-backdrop] { z-index: 980; }
+[sidenav-main] { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); }
+body.sidenav-open { overflow: hidden; overscroll-behavior: none; }
+.overflow-x-auto { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+img { max-width: 100%; }
+#pwa-install { bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); right: calc(1rem + env(safe-area-inset-right, 0px)); }
+
+@media (max-width: 575.98px) {
+  .app-button, [dropdown-menu] a, [dropdown-menu] button,
+  .card-actions a, .card-actions button, [data-file-clear] { min-height: 44px; }
+  .card-actions > form { width: 100%; }
+  .card-actions input:not([type="hidden"]), .card-actions select { width: 100%; min-width: 0; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]):not([type="color"]),
+  select, textarea, .ts-control, .ts-control input { font-size: 16px !important; }
+  input, select, textarea, .ts-wrapper { max-width: 100%; }
+  .ts-control { min-height: 44px; }
+}
+
 /* ------------------------------------------------------------------
  * Desktop sidenav toggle (hamburger button in the navbar).
  * body.sidenav-collapsed hides the sidenav and lets the content span
@@ -48,6 +69,21 @@
   padding: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+/* The native select remains accessible after Tom Select takes over. Its
+ * original w-full must not create an offscreen absolute box in form columns. */
+select.ts-hidden-accessible {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 .ts-wrapper.argon-select .ts-control {
   @apply rounded-lg border border-solid border-gray-300 bg-white px-3 py-2 text-sm font-normal leading-5.6 text-gray-700 shadow-none transition-all dark:border-white/20 dark:bg-slate-850 dark:text-white;

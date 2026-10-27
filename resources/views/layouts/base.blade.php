@@ -11,9 +11,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}" />
+    <link rel="manifest" href="{{ route('pwa.manifest') }}" />
+    <meta name="theme-color" content="{{ setting('primary_color') }}" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="{{ setting('app_short_name') ?: app_name() }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url('pwa/icons/apple-touch-icon.png') }}" />
     <link rel="icon" type="image/png" href="{{ setting('favicon') ? asset('storage/'.setting('favicon')) : asset('assets/img/favicon.png') }}" />
 
     @php
@@ -75,6 +81,8 @@
     </script>
 
     @yield('body')
+
+    <x-pwa-install />
 
     <!-- plugin for charts  -->
     <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}" async></script>

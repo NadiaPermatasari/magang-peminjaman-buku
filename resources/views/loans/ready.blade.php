@@ -5,7 +5,7 @@
 
 @section('content')
   <x-card title="Siap Diambil" subtitle="Pilih eksemplar yang diserahkan dan unggah bukti fotonya." :padding="false">
-    <div class="p-6">
+    <div class="p-4 sm:p-6">
       @forelse ($loans as $loan)
         @php
           $pendingItems = $loan->items->where('status', App\Enums\LoanStatus::APPROVED)->filter(fn ($i) => $i->bookCopy);
@@ -31,10 +31,10 @@
           @if ($copyOptions)
             <form method="POST" action="{{ route('loans.handover', $loan) }}" enctype="multipart/form-data" class="flex flex-wrap items-end gap-3 p-3 rounded-lg bg-gray-50 dark:bg-slate-900">
               @csrf
-              <div class="flex-1 min-w-56">
+              <div class="w-full min-w-0 sm:flex-1 sm:min-w-56">
                 <x-form.select name="barcode" label="Eksemplar yang diserahkan" :options="$copyOptions" required class="mb-0" placeholder="Pilih eksemplar..." />
               </div>
-              <div class="flex-1 min-w-56">
+              <div class="w-full min-w-0 sm:flex-1 sm:min-w-56">
                 <x-form.file name="photo" label="Bukti foto serah terima" accept="image/png,image/jpeg,image/webp" buttonText="Pilih foto" help="JPG/PNG/WEBP, maks 4 MB. Opsional." class="mb-0" />
               </div>
               <x-button type="submit" variant="info" size="sm" icon="fas fa-handshake">Serahkan</x-button>

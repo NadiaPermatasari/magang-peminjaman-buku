@@ -81,6 +81,15 @@ Tidak ada permanent account lockout — sesuai spec §32, mencegah limiter ini d
 
 Middleware `SecurityHeaders` (global, semua response): `Content-Security-Policy` (termasuk `frame-ancestors 'self'` untuk clickjacking), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, dan `Strict-Transport-Security` otomatis saat request HTTPS.
 
+## PWA dan Cache Offline
+
+- Manifest dan halaman `/offline` dapat diakses publik tanpa memberikan akses ke data privat.
+- Service worker `public/sw.js` hanya menyimpan halaman offline dan ikon bawaan di Cache Storage; precache dilakukan tanpa kredensial sesi.
+- HTML setelah login, data anggota, laporan, unggahan, dan respons transaksi tidak disimpan oleh service worker. Navigasi selalu mengambil respons server dan hanya memakai halaman cadangan saat jaringan gagal.
+- Metode tulis dan permintaan API tidak diintersep atau diantrekan. Aktivasi pembaruan mengikuti lifecycle browser tanpa reload paksa pada formulir.
+- CSP membatasi manifest dan worker ke origin sendiri (`manifest-src 'self'`, `worker-src 'self'`).
+- Pengoperasian PWA memerlukan HTTPS, dengan pengecualian localhost/loopback untuk pengembangan. Detail: [pwa.md](pwa.md).
+
 ## Error Handling (spec §35)
 
 - Production wajib `APP_DEBUG=false` — tidak ada stack trace/path/SQL/credential yang bocor ke pengguna.

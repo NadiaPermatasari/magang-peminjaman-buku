@@ -27,7 +27,7 @@
           <form id="reject-{{ $loan->id }}" method="POST" action="{{ route('loans.reject', $loan) }}" class="hidden pt-3 mt-3 border-t border-solid border-gray-200 dark:border-white/10">
             @csrf
             <div class="flex flex-wrap items-end gap-2">
-              <div class="flex-1 min-w-48">
+              <div class="w-full min-w-0 sm:flex-1 sm:min-w-48">
                 <x-form.input name="reason" label="Alasan penolakan (wajib)" required class="mb-0" />
               </div>
               <x-button type="submit" variant="danger" size="sm">Kirim Penolakan</x-button>

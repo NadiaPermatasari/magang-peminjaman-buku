@@ -2,10 +2,10 @@
   <div class="flex flex-wrap -mx-3">
     <div class="w-full max-w-full px-3 flex-0">
       <!-- Navbar -->
-      <nav class="absolute top-0 left-0 right-0 z-30 flex flex-wrap items-center px-4 py-2 m-6 mb-0 shadow-sm rounded-xl bg-white/80 backdrop-blur-2xl backdrop-saturate-200 lg:flex-nowrap lg:justify-start">
-        <div class="flex items-center justify-between w-full p-0 px-6 mx-auto flex-wrap-inherit">
-          <a class="py-1.75 text-sm mr-4 ml-4 whitespace-nowrap font-bold text-slate-700 lg:ml-0" href="{{ route('login') }}"> {{ app_name() }} </a>
-          <div class="items-center flex-grow basis-full lg:flex lg:basis-auto">
+      <nav class="absolute top-0 left-0 right-0 z-30 flex flex-wrap items-center px-4 py-2 m-4 mb-0 shadow-sm sm:m-6 rounded-xl bg-white/80 backdrop-blur-2xl backdrop-saturate-200 lg:flex-nowrap lg:justify-start">
+        <div class="flex items-center justify-between w-full min-w-0 gap-2 p-0 mx-auto sm:px-6">
+          <a class="flex-1 min-w-0 py-2 text-sm font-bold break-words text-slate-700" href="{{ route('login') }}">{{ app_name() }}</a>
+          <div class="flex items-center shrink-0">
             <ul class="flex flex-col pl-0 mx-auto mb-0 list-none lg:flex-row xl:ml-auto">
               @auth
                 <li>

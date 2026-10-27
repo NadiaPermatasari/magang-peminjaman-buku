@@ -5,9 +5,9 @@
     $activeCls = 'mx-1 flex h-9 w-9 items-center justify-center rounded-full border-0 bg-gradient-to-tl from-blue-500 to-violet-500 text-sm text-white shadow-md';
     $disabledCls = 'mx-1 flex h-9 w-9 items-center justify-center rounded-full border border-solid border-gray-200 bg-transparent text-sm text-slate-300 dark:border-white/20 dark:text-white/40 cursor-not-allowed';
   @endphp
-  <nav role="navigation" aria-label="Pagination" class="flex flex-wrap items-center justify-between">
+  <nav role="navigation" aria-label="Navigasi halaman" class="flex flex-wrap items-center justify-between gap-3">
     <p class="mb-0 text-sm leading-normal dark:text-white/80">
-      Showing {{ $paginator->firstItem() }} to {{ $paginator->lastItem() }} of {{ $paginator->total() }} results
+      Menampilkan {{ $paginator->firstItem() }}–{{ $paginator->lastItem() }} dari {{ $paginator->total() }} data
     </p>
     <ul class="flex flex-wrap items-center pl-0 mb-0 list-none">
       {{-- Previous --}}

@@ -99,23 +99,24 @@
 @endphp
 
 <!-- sidenav  -->
-<aside sidenav-main class="fixed inset-y-0 flex-wrap items-center justify-between block w-full p-0 my-4 overflow-y-auto antialiased transition-transform duration-200 -translate-x-full bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 max-w-64 ease-nav-brand z-990 xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0" aria-expanded="false">
-  <div class="h-19">
-    <i class="absolute top-0 right-0 p-4 opacity-50 cursor-pointer fas fa-times dark:text-white text-slate-400 xl:hidden" sidenav-close></i>
-    <a class="block px-8 py-6 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700" href="{{ route('dashboard') }}">
+<div sidenav-backdrop class="fixed inset-0 hidden bg-slate-900/50 xl:hidden" aria-hidden="true"></div>
+<aside id="app-sidenav" sidenav-main tabindex="-1" aria-label="Navigasi utama" class="fixed inset-y-0 flex flex-col w-full p-0 my-4 overflow-hidden antialiased transition-transform duration-200 -translate-x-full bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 max-w-64 ease-nav-brand z-990 xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0" aria-expanded="false">
+  <div class="shrink-0">
+    <button type="button" class="absolute top-1 right-1 inline-flex items-center justify-center bg-transparent border-0 rounded-lg cursor-pointer w-11 h-11 dark:text-white text-slate-400 xl:hidden" sidenav-close aria-label="Tutup menu navigasi"><i class="fas fa-times" aria-hidden="true"></i></button>
+    <a class="flex items-center min-w-0 gap-2 py-5 pl-4 pr-12 m-0 text-sm dark:text-white text-slate-700 xl:pr-4" href="{{ route('dashboard') }}">
       @if (setting('logo'))
-        <img src="{{ asset('storage/'.setting('logo')) }}" class="inline h-full max-w-full transition-all duration-200 ease-nav-brand max-h-8" alt="{{ app_name() }}" />
+        <img src="{{ asset('storage/'.setting('logo')) }}" class="object-contain w-8 h-8 shrink-0" alt="" />
       @else
-        <img src="{{ asset('assets/img/logo-ct-dark.png') }}" class="inline h-full max-w-full transition-all duration-200 dark:hidden ease-nav-brand max-h-8" alt="main_logo" />
-        <img src="{{ asset('assets/img/logo-ct.png') }}" class="hidden h-full max-w-full transition-all duration-200 dark:inline ease-nav-brand max-h-8" alt="main_logo" />
+        <img src="{{ asset('assets/img/logo-ct-dark.png') }}" class="object-contain w-8 h-8 shrink-0 dark:hidden" alt="" />
+        <img src="{{ asset('assets/img/logo-ct.png') }}" class="hidden object-contain w-8 h-8 shrink-0 dark:block" alt="" />
       @endif
-      <span class="ml-1 font-semibold transition-all duration-200 ease-nav-brand">{{ app_name() }}</span>
+      <span class="min-w-0 font-semibold leading-tight break-words">{{ app_name() }}</span>
     </a>
   </div>
 
-  <hr class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent" />
+  <hr class="w-full h-px mt-0 shrink-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent" />
 
-  <div class="items-center block w-auto max-h-screen overflow-auto h-sidenav grow basis-full">
+  <div class="w-full min-h-0 overflow-y-auto flex-1">
     <ul class="flex flex-col pl-0 mb-0">
       {!! $renderItems($visible($general)) !!}
 
@@ -146,7 +147,7 @@
     </ul>
   </div>
 
-  <div class="mx-4">
+  <div class="mx-4 shrink-0">
     <!-- load phantom colors for card after: -->
     <p class="invisible hidden text-gray-800 text-red-500 text-red-600 text-blue-500 dark:bg-white bg-slate-500 bg-gray-500/30 bg-cyan-500/30 bg-emerald-500/30 bg-orange-500/30 bg-red-500/30 bg-blue-500/30 after:bg-gradient-to-tl after:from-zinc-800 after:to-zinc-700 dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 after:from-blue-700 after:to-cyan-500 after:from-orange-500 after:to-yellow-500 after:from-green-600 after:to-lime-400 after:from-red-600 after:to-orange-600 after:from-slate-600 after:to-slate-300 text-emerald-500 text-cyan-500 text-slate-400 text-yellow-500 text-violet-500"></p>
     <div class="p-3 mb-4 text-center rounded-xl bg-gray-50 dark:bg-slate-900" sidenav-card>

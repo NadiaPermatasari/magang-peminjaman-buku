@@ -14,8 +14,8 @@
 
 <div {{ $attributes->merge(['class' => 'relative flex flex-col min-w-0 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border']) }}>
   @if ($title || isset($actions))
-    <div class="flex flex-wrap items-center gap-2 p-6 pb-0 mb-0 border-b-0 rounded-t-2xl">
-      <div class="mr-auto">
+    <div class="flex flex-wrap items-center gap-3 p-4 pb-0 mb-0 border-b-0 rounded-t-2xl sm:p-6 sm:pb-0">
+      <div class="min-w-0 max-w-full mr-auto">
         @if ($title)
           <h6 class="mb-0 dark:text-white">{{ $title }}</h6>
         @endif
@@ -24,14 +24,14 @@
         @endif
       </div>
       @isset($actions)
-        <div class="flex flex-wrap items-center gap-2">{{ $actions }}</div>
+        <div class="card-actions flex flex-wrap items-center w-full min-w-0 max-w-full gap-2 sm:w-auto">{{ $actions }}</div>
       @endisset
     </div>
   @endif
-  <div class="flex-auto {{ $padding ? 'p-6' : 'px-0 pt-0 pb-2' }}">
+  <div class="flex-auto min-w-0 {{ $padding ? 'p-4 sm:p-6' : 'px-0 pt-0 pb-2' }}">
     {{ $slot }}
   </div>
   @isset($footer)
-    <div class="p-6 pt-0">{{ $footer }}</div>
+    <div class="p-4 pt-0 sm:p-6 sm:pt-0">{{ $footer }}</div>
   @endisset
 </div>

@@ -17,12 +17,12 @@
 
   @include('layouts.partials.sidenav')
 
-  <div class="relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68">
+  <div class="app-main relative min-w-0 min-h-screen transition-all duration-200 ease-in-out xl:ml-68">
     @include('layouts.partials.navbar-profile')
 
     {{-- Header card --}}
     <div class="relative w-full mx-auto mt-60 ">
-      <div class="relative flex flex-col flex-auto min-w-0 p-4 mx-6 overflow-hidden break-words bg-white border-0 dark:bg-slate-850 dark:shadow-dark-xl shadow-3xl rounded-2xl bg-clip-border">
+      <div class="relative flex flex-col flex-auto min-w-0 p-4 mx-4 sm:mx-6 break-words bg-white border-0 dark:bg-slate-850 dark:shadow-dark-xl shadow-3xl rounded-2xl bg-clip-border">
         <div class="flex flex-wrap -mx-3">
           <div class="flex-none w-auto max-w-full px-3">
             <div class="relative inline-flex items-center justify-center text-white transition-all duration-200 ease-in-out text-base h-19 w-19 rounded-xl">
@@ -65,7 +65,7 @@
       </div>
     </div>
 
-    <div class="w-full p-6 mx-auto">
+    <div class="app-content w-full p-4 mx-auto sm:p-6">
       @include('layouts.partials.alerts')
 
       <div class="flex flex-wrap -mx-3">
@@ -141,7 +141,7 @@
                   <code class="block px-3 py-2 mb-4 text-sm font-bold break-all rounded-lg bg-gray-100 text-slate-700 dark:bg-slate-900 dark:text-white">{{ $user->two_factor_secret }}</code>
                   <form method="POST" action="{{ route('two-factor.confirm') }}" class="flex flex-wrap items-end gap-2">
                     @csrf
-                    <div class="flex-1 min-w-40">
+                    <div class="w-full min-w-0 sm:flex-1 sm:min-w-40">
                       <x-form.input name="code" label="Kode 6 digit" placeholder="123456" inputmode="numeric" autocomplete="one-time-code" bag="confirmTwoFactorAuthentication" class="mb-0" required />
                     </div>
                     <x-button type="submit" variant="success" icon="fas fa-check" class="mb-0">Konfirmasi &amp; aktifkan</x-button>
@@ -201,7 +201,7 @@
             @if ($sessions->count() > 1)
               <form method="POST" action="{{ route('profile.sessions.logout-others') }}" class="flex flex-wrap items-end gap-2">
                 @csrf
-                <div class="flex-1 min-w-48">
+                <div class="w-full min-w-0 sm:flex-1 sm:min-w-48">
                   <x-form.input name="password" label="Konfirmasi kata sandi untuk keluar dari sesi lain" type="password" bag="logoutOtherSessions" autocomplete="current-password" class="mb-0" required />
                 </div>
                 <x-button type="submit" variant="dark" icon="fas fa-sign-out-alt">Keluar dari sesi lain</x-button>
@@ -214,7 +214,7 @@
             <form method="POST" action="{{ route('profile.destroy') }}" onsubmit="return confirm('Hapus akun Anda secara permanen?');" class="flex flex-wrap items-end gap-2">
               @csrf
               @method('DELETE')
-              <div class="flex-1 min-w-48">
+              <div class="w-full min-w-0 sm:flex-1 sm:min-w-48">
                 <x-form.input name="password" label="Konfirmasi kata sandi" type="password" bag="deleteAccount" autocomplete="current-password" class="mb-0" required />
               </div>
               <x-button type="submit" variant="danger" icon="fas fa-trash">Hapus akun saya</x-button>

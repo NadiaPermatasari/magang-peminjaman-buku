@@ -12,6 +12,7 @@ Tampilan menggunakan [Argon Dashboard Tailwind](https://www.creative-tim.com/pro
 - [Migration & Seeding](#migration--seeding)
 - [Membuat Akun Super Admin](#membuat-akun-super-admin)
 - [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [PWA (Pasang Aplikasi)](#pwa-pasang-aplikasi)
 - [Queue & Scheduler](#queue--scheduler)
 - [Storage & Upload](#storage--upload)
 - [Autentikasi & 2FA](#autentikasi--2fa)
@@ -93,6 +94,19 @@ Atau jalankan server + queue worker + log viewer + Vite sekaligus:
 ```bash
 composer run dev
 ```
+
+## PWA (Pasang Aplikasi)
+
+Website mendukung pemasangan sebagai aplikasi di ponsel dan desktop, dengan
+manifest yang mengikuti identitas dari Pengaturan serta halaman cadangan saat
+koneksi terputus. Data anggota dan transaksi tetap memerlukan koneksi internet;
+service worker hanya menyimpan halaman offline publik dan ikon bawaan.
+
+Gunakan HTTPS saat deployment atau `http://localhost` / `http://127.0.0.1` saat
+pengembangan. Setelah `npm run build`, buka website dan pilih **Pasang Aplikasi**
+di browser yang mendukung. Pada iPhone/iPad, gunakan **Bagikan → Tambahkan ke
+Layar Utama**. Panduan pemasangan, cache, pembaruan, dan pengujian tersedia di
+[docs/pwa.md](docs/pwa.md).
 
 ## Queue & Scheduler
 
@@ -219,6 +233,8 @@ Ringkasan kontrol keamanan yang diimplementasikan ada di [docs/security.md](docs
 
 - [docs/DOKUMENTASI_APLIKASI.md](docs/DOKUMENTASI_APLIKASI.md) — dokumentasi lengkap satu-file: apa aplikasi ini, fitur, struktur kode, keamanan siber, dan enkripsi data
 - [docs/architecture.md](docs/architecture.md) — struktur aplikasi, domain model, alasan keputusan desain
+- [docs/pwa.md](docs/pwa.md) — pemasangan PWA, halaman offline, cache, dan deployment
+- [docs/mobile-audit.md](docs/mobile-audit.md) — audit tampilan ponsel, tabel, formulir, dan navigasi
 - [docs/security.md](docs/security.md) — kontrol keamanan detail per OWASP ASVS Level 2
 - [docs/permissions.md](docs/permissions.md) — daftar permission dan pemetaan role
 - [docs/loan-flow.md](docs/loan-flow.md) — diagram dan penjelasan alur peminjaman-pengembalian-perpanjangan

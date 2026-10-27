@@ -11,13 +11,13 @@
 @section('content')
   <x-card title="Pengguna" :subtitle="$users->total().' akun'" :padding="false">
     <x-slot:actions>
-      <div class="flex items-center p-1 mr-2 bg-gray-100 rounded-lg dark:bg-slate-700">
+      <div class="flex flex-wrap items-center max-w-full gap-1 p-1 bg-gray-100 rounded-lg dark:bg-slate-700">
         <a href="{{ route('users.index', array_filter(['search' => request('search')])) }}" class="px-3 py-1 text-xs font-bold rounded-md {{ ! request('role') ? 'text-white bg-blue-500 shadow-md' : 'text-slate-500 dark:text-white' }}">Semua</a>
         @foreach ($roles as $value => $label)
           <a href="{{ route('users.index', array_filter(['role' => $value, 'search' => request('search')])) }}" class="px-3 py-1 text-xs font-bold rounded-md {{ request('role') === $value ? 'text-white bg-blue-500 shadow-md' : 'text-slate-500 dark:text-white' }}">{{ $label }}</a>
         @endforeach
       </div>
-      <form method="GET" action="{{ route('users.index') }}" class="hidden sm:block">
+      <form method="GET" action="{{ route('users.index') }}" class="w-full min-w-0 sm:w-auto">
         <input type="hidden" name="role" value="{{ request('role') }}" />
         <div class="relative flex flex-wrap items-stretch w-full transition-all rounded-lg ease">
           <span class="text-sm ease leading-5.6 absolute z-50 -ml-px flex h-full items-center whitespace-nowrap rounded-lg rounded-tr-none rounded-br-none border border-r-0 border-transparent bg-transparent py-2 px-2.5 text-center font-normal text-slate-500 transition-all">

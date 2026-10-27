@@ -34,7 +34,7 @@
           <form method="POST" action="{{ route('loans.reject', $loan) }}" class="p-3 mb-4 rounded-lg bg-gray-50 dark:bg-slate-900" onsubmit="return confirm('Tolak pengajuan ini?');">
             @csrf
             <div class="flex flex-wrap items-end gap-2">
-              <div class="flex-1 min-w-48">
+              <div class="w-full min-w-0 sm:flex-1 sm:min-w-48">
                 <x-form.input name="reason" label="Alasan penolakan (wajib)" required class="mb-0" />
               </div>
               <x-button type="submit" variant="danger" size="sm" icon="fas fa-ban">Tolak Pengajuan</x-button>
@@ -107,7 +107,7 @@
               <div class="w-full max-w-full px-3 md:w-3/12">
                 <x-form.input name="days" label="Tambahan hari" type="number" min="1" :max="setting('loan_duration_days', 7)" :value="old('days', 3)" required class="mb-0" />
               </div>
-              <div class="flex-1 min-w-56 px-3">
+              <div class="w-full min-w-0 px-3 sm:flex-1 sm:min-w-56">
                 <x-form.input name="reason" label="Alasan perpanjangan (wajib)" :value="old('reason')" required class="mb-0" />
               </div>
               <div class="px-3">
@@ -150,16 +150,16 @@
 
             @can('decide', $extension)
               <div class="flex flex-wrap items-end gap-2 pt-3 mt-3 border-t border-solid border-gray-100 dark:border-white/5">
-                <form method="POST" action="{{ route('loan-extensions.approve', $extension) }}" onsubmit="return confirm('Setujui perpanjangan ini? Jatuh tempo peminjaman akan digeser.');" class="flex items-end flex-1 gap-2 min-w-56">
+                <form method="POST" action="{{ route('loan-extensions.approve', $extension) }}" onsubmit="return confirm('Setujui perpanjangan ini? Jatuh tempo peminjaman akan digeser.');" class="flex flex-wrap items-end w-full min-w-0 gap-2 sm:flex-1 sm:min-w-56">
                   @csrf
-                  <div class="flex-1">
+                  <div class="w-full min-w-0 sm:flex-1">
                     <x-form.input name="note" label="Catatan (opsional)" class="mb-0" />
                   </div>
                   <x-button type="submit" variant="success" size="sm" icon="fas fa-check">Setujui</x-button>
                 </form>
-                <form method="POST" action="{{ route('loan-extensions.reject', $extension) }}" onsubmit="return confirm('Tolak perpanjangan ini?');" class="flex items-end flex-1 gap-2 min-w-56">
+                <form method="POST" action="{{ route('loan-extensions.reject', $extension) }}" onsubmit="return confirm('Tolak perpanjangan ini?');" class="flex flex-wrap items-end w-full min-w-0 gap-2 sm:flex-1 sm:min-w-56">
                   @csrf
-                  <div class="flex-1">
+                  <div class="w-full min-w-0 sm:flex-1">
                     <x-form.input name="note" label="Alasan penolakan (wajib)" required class="mb-0" />
                   </div>
                   <x-button type="submit" variant="danger" size="sm" icon="fas fa-ban">Tolak</x-button>

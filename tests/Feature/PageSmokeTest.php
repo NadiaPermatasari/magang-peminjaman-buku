@@ -7,6 +7,7 @@ use App\Actions\Loans\CreateLoan;
 use App\Actions\Loans\HandoverLoan;
 use App\Actions\Loans\RequestLoanExtension;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\Loan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -28,6 +29,7 @@ class PageSmokeTest extends TestCase
     public static function pageProvider(): array
     {
         return [
+            ['offline'],
             ['dashboard'],
             ['catalog'],
             ['notifications'],
@@ -122,7 +124,7 @@ class PageSmokeTest extends TestCase
     public function test_book_can_be_stored_with_land_right_fields(): void
     {
         $this->seedRoles();
-        $category = \App\Models\Category::factory()->create();
+        $category = Category::factory()->create();
 
         $this->actingAs($this->makeUser('super-admin'))->post('/books', [
             'title' => 'Berkas Tanah A',
